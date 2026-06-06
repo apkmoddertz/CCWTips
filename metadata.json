@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: Cash Cow VIP",
+  "description": "A premium dark-theme sports betting and football match prediction application featuring daily free tips, custom VIP plans, scrollable date filters, and developer simulation controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

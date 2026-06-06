@@ -1,0 +1,238 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // DEFAULT DENY ALL NETWORK REJECT-ALL
+    // ==========================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ==========================================
+    // GLOBAL VALIDATION UTILITIES & HELPERS
+    // ==========================================
+    
+    // Checks if request has a valid authentication session token
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checks if the authenticated user's UID matches the target entity
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Performance-optimized administrator role resolver
+    // Boots with short-circuited email whitelist checks to avoid billing database reads,
+    // and falls back to user document verification for runtime dynamic admins.
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ngimbabetwin@gmail.com' || 
+        request.auth.token.email == 'jilalamasanja1998@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // Performance-optimized VIP check to determine if user should view locked odds tipping content
+    function isVipUser() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ngimbabetwin@gmail.com' || 
+        request.auth.token.email == 'jilalamasanja1998@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isVip == true ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        ))
+      );
+    }
+
+    // Convenience function to refer to the incoming resource data mapping
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Convenience function to refer to existing resource data stored in DB
+    function existing() {
+      return resource.data;
+    }
+
+    // ==========================================
+    // STRICT SCHEMA SCHEMATICS & DATA TYPE CONTRACTS
+    // ==========================================
+
+    // Enforces user document schema structure, limits field counts, and asserts correct types
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'isVip', 'role']) &&
+             data.keys().size() >= 4 && data.keys().size() <= 10 &&
+             data.uid is string &&
+             data.email is string &&
+             data.email.size() <= 256 &&
+             data.isVip is bool &&
+             data.role is string &&
+             (data.role == 'user' || data.role == 'admin') &&
+             (!data.keys().hasAny(['username']) || (data.username is string && data.username.size() <= 100)) &&
+             (!data.keys().hasAny(['vipStartDate']) || data.vipStartDate is string) &&
+             (!data.keys().hasAny(['vipEndDate']) || data.vipEndDate is string) &&
+             (!data.keys().hasAny(['country']) || (data.country is string && data.country.size() <= 120)) &&
+             (!data.keys().hasAny(['city']) || (data.city is string && data.city.size() <= 120));
+    }
+
+    // Enforces match tip prediction specifications, asserting types for score cards, match timing, and premium features
+    function isValidMatch(data) {
+      return data.keys().hasAll(['id', 'homeTeam', 'awayTeam', 'time', 'prediction', 'odds', 'status', 'type', 'dateId', 'createdAt']) &&
+             data.keys().size() >= 10 && data.keys().size() <= 14 &&
+             data.id is string &&
+             data.homeTeam is string && data.homeTeam.size() <= 100 &&
+             data.awayTeam is string && data.awayTeam.size() <= 100 &&
+             data.time is string && data.time.size() <= 10 &&
+             data.prediction is string && data.prediction.size() <= 200 &&
+             data.odds is number &&
+             data.status is string && (data.status == 'win' || data.status == 'lose' || data.status == 'pending') &&
+             data.type is string && (data.type == 'free' || data.type == 'vip') &&
+             data.dateId is string && data.dateId.size() <= 20 &&
+             (!data.keys().hasAny(['homeScore']) || data.homeScore is number) &&
+             (!data.keys().hasAny(['awayScore']) || data.awayScore is number) &&
+             (!data.keys().hasAny(['matchMinute']) || data.matchMinute is number) &&
+             (!data.keys().hasAny(['liveStatus']) || (data.liveStatus is string && (data.liveStatus == 'upcoming' || data.liveStatus == 'live' || data.liveStatus == 'finished')));
+    }
+
+    // Ensures user receipt details and billing information pass basic ranges and have a secure status
+    function isValidPayment(data) {
+      return data.keys().hasAll(['id', 'userId', 'userEmail', 'planDuration', 'planPrice', 'paymentMethod', 'screenshot', 'status', 'submittedAt']) &&
+             data.keys().size() >= 9 && data.keys().size() <= 14 &&
+             data.id is string &&
+             data.userId is string &&
+             data.userEmail is string &&
+             data.planDuration is string &&
+             data.planPrice is number &&
+             data.paymentMethod is string &&
+             data.screenshot is string &&
+             data.status is string && (data.status == 'pending' || data.status == 'approved' || data.status == 'rejected') &&
+             data.submittedAt is string &&
+             (!data.keys().hasAny(['txHashOrPhone']) || data.txHashOrPhone is string) &&
+             (!data.keys().hasAny(['vipStartDate']) || data.vipStartDate is string) &&
+             (!data.keys().hasAny(['vipEndDate']) || data.vipEndDate is string) &&
+             (!data.keys().hasAny(['username']) || data.username is string);
+    }
+
+    // Controls configuration toggle specifications
+    function isValidSetting(data) {
+      return data.keys().size() >= 1 && data.keys().size() <= 4 &&
+             (!data.keys().hasAny(['isApprovalsTickerOn']) || data.isApprovalsTickerOn is bool) &&
+             (!data.keys().hasAny(['hasSeededDefault']) || data.hasSeededDefault is bool);
+    }
+
+    // ==========================================
+    // RESOURCE SPECIFIC PATH ENFORCEMENT
+    // ==========================================
+
+    // 1. Users Profile collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      
+      allow create: if isOwner(userId) && 
+                       isValidUser(incoming()) && 
+                       incoming().uid == userId &&
+                       
+                       // For normal user registrations, role can ONLY be established as 'user'
+                       // with no VIP access parameters starting on account declaration.
+                       // Bootstrap administrator whitelists bypass this guard to enable local setup.
+                       ((incoming().role == 'user' && 
+                         incoming().isVip == false && 
+                         !incoming().keys().hasAny(['vipStartDate', 'vipEndDate'])
+                        ) || (
+                         request.auth.token.email == 'ngimbabetwin@gmail.com' || 
+                         request.auth.token.email == 'jilalamasanja1998@gmail.com'
+                        ));
+                        
+      allow update: if isAdmin() || (
+                       isOwner(userId) && 
+                       isValidUser(incoming()) &&
+                       incoming().uid == userId &&
+                       
+                       // Strict immutable controls - non-admins cannot mutate their operational headers 
+                       // to execute local privilege escalation hacks
+                       incoming().role == existing().role &&
+                       incoming().isVip == existing().isVip &&
+                       incoming().email == existing().email &&
+                       
+                       (
+                         (!existing().keys().hasAny(['vipStartDate']) && !incoming().keys().hasAny(['vipStartDate'])) ||
+                         (existing().keys().hasAny(['vipStartDate']) && incoming().keys().hasAny(['vipStartDate']) && incoming().vipStartDate == existing().vipStartDate)
+                       ) &&
+                       (
+                         (!existing().keys().hasAny(['vipEndDate']) && !incoming().keys().hasAny(['vipEndDate'])) ||
+                         (existing().keys().hasAny(['vipEndDate']) && incoming().keys().hasAny(['vipEndDate']) && incoming().vipEndDate == existing().vipEndDate)
+                       )
+                     );
+                        
+      allow delete: if isAdmin();
+    }
+
+    // 2. Usernames availability mapping mapping
+    match /usernames/{usernameId} {
+      allow get: if true;
+      allow create: if isSignedIn() &&
+                    request.auth.uid == incoming().uid &&
+                    !exists(/databases/$(database)/documents/usernames/{usernameId}) &&
+                    usernameId is string && 
+                    usernameId.size() <= 100 &&
+                    usernameId.matches('^[a-zA-Z0-9_\\-]+$') &&
+                    incoming().keys().hasAll(['uid', 'email', 'username']) &&
+                    incoming().uid is string &&
+                    incoming().email is string &&
+                    incoming().username is string;
+      allow update, delete: if isAdmin();
+    }
+
+    // 3. Matches tipping collection (updated to cashcow_vip_tips)
+    match /cashcow_vip_tips/{matchId} {
+      // Free predictions are readable by any authenticated member.
+      // Premium predictions (VIP) are strictly locked and can only be accessed by whitelisted admins or premium members.
+      allow read: if isSignedIn() && (
+        resource.data.type == 'free' || isVipUser()
+      );
+      
+      allow create: if isAdmin() && 
+                       isValidMatch(incoming()) && 
+                       incoming().id == matchId &&
+                       incoming().createdAt == request.time;
+                        
+      allow update: if isAdmin() && 
+                       isValidMatch(incoming()) && 
+                       incoming().id == matchId &&
+                       (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time);
+                        
+      allow delete: if isAdmin();
+    }
+
+    // 4. Billing receipts / user payment registration
+    match /payments/{paymentId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Standard users must submit dynamic listings commencing under "pending" status ONLY.
+      // They are forbidden from overriding to approved/rejected directly on creation.
+      allow create: if isSignedIn() &&
+                       incoming().userId == request.auth.uid &&
+                       isValidPayment(incoming()) &&
+                       incoming().id == paymentId &&
+                       (isAdmin() || incoming().status == 'pending');
+                       
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 5. App Setting collection controls
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidSetting(incoming());
+    }
+
+    // 6. Recycle bin / deleted matches backup logs
+    match /recycle_bin/{itemId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

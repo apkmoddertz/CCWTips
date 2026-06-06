@@ -1,0 +1,91 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores details about registered users and their roles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "isVip": { "type": "boolean" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "username": { "type": "string" },
+        "vipStartDate": { "type": "string" },
+        "vipEndDate": { "type": "string" },
+        "country": { "type": "string" },
+        "city": { "type": "string" }
+      },
+      "required": ["uid", "email", "isVip", "role"]
+    },
+    "MatchTip": {
+      "title": "Match Tip",
+      "description": "Represents a football match prediction tip.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "homeTeam": { "type": "string" },
+        "awayTeam": { "type": "string" },
+        "time": { "type": "string" },
+        "prediction": { "type": "string" },
+        "odds": { "type": "number" },
+        "status": { "type": "string", "enum": ["win", "lose", "pending"] },
+        "type": { "type": "string", "enum": ["free", "vip"] },
+        "dateId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "homeTeam", "awayTeam", "time", "prediction", "odds", "status", "type", "dateId"]
+    },
+    "Payment": {
+      "title": "Payment Verification Record",
+      "description": "User subscription payment proof verification document.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "planDuration": { "type": "string" },
+        "planPrice": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "screenshot": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "submittedAt": { "type": "string" },
+        "txHashOrPhone": { "type": "string" },
+        "vipStartDate": { "type": "string" },
+        "vipEndDate": { "type": "string" },
+        "username": { "type": "string" }
+      },
+      "required": ["id", "userId", "userEmail", "planDuration", "planPrice", "paymentMethod", "screenshot", "status", "submittedAt"]
+    },
+    "AppConfig": {
+      "title": "Application Global Configuration",
+      "description": "Stores global feature flags configurable by system administrators.",
+      "type": "object",
+      "properties": {
+        "isApprovalsTickerOn": { "type": "boolean" }
+      },
+      "required": ["isApprovalsTickerOn"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User documents mapping firebase auth uid to user record."
+    },
+    "cashcow_vip_tips/{matchId}": {
+      "schema": "MatchTip",
+      "description": "Prediction tips dataset in Firestore."
+    },
+    "payments/{paymentId}": {
+      "schema": "Payment",
+      "description": "User uploaded payment receipts waiting for admin approval."
+    },
+    "settings/{settingId}": {
+      "schema": "AppConfig",
+      "description": "Configurable application flags read by users and written by administrators."
+    },
+    "recycle_bin/{itemId}": {
+      "schema": "MatchTip",
+      "description": "Recycle bin storing auto-backed-up matches deleted by administrators."
+    }
+  }
+}

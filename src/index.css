@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: "Space Grotesk", sans-serif;
+}
+
+/* Force native APK text selection inhibition and outline resets */
+* {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  -webkit-touch-callout: none !important; /* Disables standard iOS Link sheet balloon menu */
+  -webkit-tap-highlight-color: transparent !important; /* Prevents gray highlight on touch active */
+}
+
+/* Retain text selection for input/textarea forms so users can write search bounds and codes */
+input, textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Custom Sports Betting Glow & Neon Animations */
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Fluid animations in place of heavy JS frameworks to save container thread cycles */
+@layer utilities {
+  .animate-fade-in {
+    animation: toastFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .animate-slide-down {
+    animation: collapseSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .animate-spin-slow {
+    animation: rotating360 8s linear infinite;
+  }
+  
+  .animate-bounce-slow {
+    animation: bounceUpDown 3s ease-in-out infinite;
+  }
+
+  .animate-splash-logo {
+    animation: splashLogoIntro 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+
+  .animate-splash-border {
+    animation: splashBorderIntro 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-fall-fast {
+    animation: rainDown 4.5s linear infinite;
+  }
+  .animate-fall-medium {
+    animation: rainDown 6s linear infinite;
+  }
+  .animate-fall-slow {
+    animation: rainDown 8s linear infinite;
+  }
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes collapseSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotating360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounceUpDown {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes rainDown {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes splashLogoIntro {
+  0% {
+    transform: scale(0.4) rotate(-18deg);
+    filter: brightness(0.6) drop-shadow(0 0 0 rgba(245, 196, 0, 0));
+  }
+  35% {
+    transform: scale(1.15) rotate(8deg);
+    filter: brightness(1.35) drop-shadow(0 0 25px rgba(245, 196, 0, 0.95));
+  }
+  60% {
+    transform: scale(0.96) rotate(-3deg);
+    filter: brightness(1) drop-shadow(0 0 15px rgba(245, 196, 0, 0.6));
+  }
+  100% {
+    transform: scale(1.0) rotate(0deg);
+    filter: brightness(1) drop-shadow(0 0 18px rgba(245, 196, 0, 0.75));
+  }
+}
+
+@keyframes splashBorderIntro {
+  0% {
+    transform: scale(1.2) opacity(0);
+    filter: brightness(1.6) blur(6px);
+  }
+  20% {
+    transform: scale(1.03) opacity(0.85);
+    filter: brightness(1.2) blur(0px);
+  }
+  50% {
+    transform: scale(0.98) opacity(0.95);
+    filter: brightness(0.95) blur(0px);
+  }
+  75% {
+    transform: scale(1.01) opacity(0.85);
+    filter: brightness(1.05) blur(0px);
+  }
+  100% {
+    transform: scale(1.0) opacity(0.92);
+    filter: brightness(1.0) blur(0px);
+  }
+}
+
+/* High contrast details */
+input[type="range"]::-webkit-slider-thumb {
+  border: 2px solid #000;
+  box-shadow: 0 0 10px rgba(245, 196, 0, 0.8);
+}
+input[type="range"]::-moz-range-thumb {
+  border: 2px solid #000;
+  box-shadow: 0 0 10px rgba(245, 196, 0, 0.8);
+}
