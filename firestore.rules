@@ -195,15 +195,9 @@ service cloud.firestore {
         resource.data.type == 'free' || isVipUser()
       );
       
-      allow create: if isAdmin() && 
-                       isValidMatch(incoming()) && 
-                       incoming().id == matchId &&
-                       incoming().createdAt == request.time;
-                        
-      allow update: if isAdmin() && 
-                       isValidMatch(incoming()) && 
-                       incoming().id == matchId &&
-                       (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time);
+      allow create, update: if isAdmin() && 
+                               isValidMatch(incoming()) && 
+                               incoming().id == matchId;
                         
       allow delete: if isAdmin();
     }
