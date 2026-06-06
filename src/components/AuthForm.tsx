@@ -10,7 +10,17 @@ import { Mail, Lock, Sparkles, HelpCircle, ArrowLeft } from 'lucide-react';
 const cowLogo = "https://i.ibb.co/Lhzt1vX1/cashcowlogo.png";
 
 interface AuthFormProps {
-  onAuthSuccess: (user: { uid: string; email: string; role: 'user' | 'admin'; isVip: boolean }) => void;
+  onAuthSuccess: (user: { 
+    uid: string; 
+    email: string; 
+    role: 'user' | 'admin'; 
+    isVip: boolean;
+    username?: string;
+    vipStartDate?: string;
+    vipEndDate?: string;
+    country?: string;
+    city?: string;
+  }) => void;
   onShowNotification: (msg: string, type: 'success' | 'info') => void;
 }
 
@@ -63,22 +73,15 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
     if (trimmed.length < 3) {
       return 'Username must be at least 3 characters long.';
     }
-    if (trimmed.length > 25) {
-      return 'Username cannot be longer than 25 characters.';
+    if (trimmed.length > 30) {
+      return 'Username cannot be longer than 30 characters.';
     }
     if (trimmed.includes('@')) {
-      return 'Username cannot resemble an email address or contain "@".';
+      return 'Username cannot contain "@".';
     }
-    if (trimmed.includes('.')) {
-      return 'Username cannot contain dots "." or resemble email domains.';
-    }
-    if (trimmed.toLowerCase().endsWith('mail')) {
-      return 'Username cannot end with "mail".';
-    }
-    
-    const pattern = /^[a-zA-Z0-9_]+$/;
+    const pattern = /^[a-zA-Z0-9_.\-]+$/;
     if (!pattern.test(trimmed)) {
-      return 'Username can only contain letters, numbers, and underscores.';
+      return 'Username can only contain letters, numbers, dots, hyphens, and underscores.';
     }
     return null;
   };
@@ -135,7 +138,12 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
           uid: fbUser.uid,
           email: fbUser.email || finalEmail,
           role: profile.role,
-          isVip: profile.isVip
+          isVip: profile.isVip,
+          username: profile.username || '',
+          vipStartDate: profile.vipStartDate || '',
+          vipEndDate: profile.vipEndDate || '',
+          country: profile.country || '',
+          city: profile.city || ''
         });
         onShowNotification('Successfully authenticated with premium server!', 'success');
       } else {
@@ -190,13 +198,39 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
         const userCredential = await createUserWithEmailAndPassword(auth, uEmail, password);
         const fbUser = userCredential.user;
 
+        // Immediately cache the local fallback profile to resolve onAuthStateChanged immediately
+        const emailLowerValue = fbUser.email?.toLowerCase() || uEmail.toLowerCase();
+        const isAdminEmailCheck = emailLowerValue === 'ngimbabetwin@gmail.com' || emailLowerValue === 'jilalamasanja1998@gmail.com';
+        const fallbackProfile = {
+          uid: fbUser.uid,
+          email: fbUser.email || uEmail,
+          role: isAdminEmailCheck ? 'admin' : 'user' as const,
+          isVip: false,
+          username: uName,
+          vipStartDate: '',
+          vipEndDate: '',
+          country: '',
+          city: ''
+        };
+        try {
+          localStorage.setItem(`cached_profile_${fbUser.uid}`, JSON.stringify(fallbackProfile));
+          localStorage.setItem('last_logged_in_uid', fbUser.uid);
+        } catch (e) {
+          // ignore
+        }
+
         const profile = await createUserProfile(fbUser.uid, fbUser.email || uEmail, uName);
 
         onAuthSuccess({
           uid: fbUser.uid,
           email: fbUser.email || uEmail,
           role: profile.role,
-          isVip: profile.isVip
+          isVip: profile.isVip,
+          username: profile.username || uName,
+          vipStartDate: profile.vipStartDate || '',
+          vipEndDate: profile.vipEndDate || '',
+          country: profile.country || '',
+          city: profile.city || ''
         });
         onShowNotification('Account successfully registered on premium server!', 'success');
       }

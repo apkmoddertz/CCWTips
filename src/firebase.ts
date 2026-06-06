@@ -41,7 +41,8 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Use custom database ID if available, otherwise default
-export const db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId);
+const dbId = (firebaseConfig as any).firestoreDatabaseId;
+export const db = dbId ? getFirestore(app, dbId) : getFirestore(app);
 
 // Connection test from skill instructions
 async function testConnection() {

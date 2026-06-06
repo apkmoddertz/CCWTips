@@ -29,7 +29,7 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'ngimbabetwin@gmail.com' || 
-        request.auth.token.email == 'jilalamasanja1998@gmail.com' ||
+        request.auth.token.email == 'jilalamasanja1998@gmail.com' || incoming().email == 'ngimbabetwin@gmail.com' || incoming().email == 'jilalamasanja1998@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
@@ -144,7 +144,7 @@ service cloud.firestore {
                          !incoming().keys().hasAny(['vipStartDate', 'vipEndDate'])
                         ) || (
                          request.auth.token.email == 'ngimbabetwin@gmail.com' || 
-                         request.auth.token.email == 'jilalamasanja1998@gmail.com'
+                         request.auth.token.email == 'jilalamasanja1998@gmail.com' || incoming().email == 'ngimbabetwin@gmail.com' || incoming().email == 'jilalamasanja1998@gmail.com'
                         ));
                         
       allow update: if isAdmin() || (
