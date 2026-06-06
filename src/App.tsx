@@ -34,6 +34,7 @@ import { collection, onSnapshot, query, orderBy, limit, doc, updateDoc, setDoc, 
 import { AuthForm } from './components/AuthForm';
 import { UserProfile } from './components/UserProfile';
 import { VipApprovalsTicker } from './components/VipApprovalsTicker';
+import { registerPushNotifications, removePushNotificationListeners } from './utils/pushNotifications';
 
 // --- DAR ES SALAAM (EAST AFRICA TIME, UTC+3) CALENDAR UTILITIES ---
 const MONTH_NAMES = [
@@ -629,6 +630,33 @@ export default function App() {
       if (unsubUser) unsubUser();
     };
   }, []);
+
+  // Set up Firebase Cloud Messaging push notifications for authenticated users
+  useEffect(() => {
+    if (currentUser?.uid) {
+      registerPushNotifications(
+        currentUser.uid,
+        (notification) => {
+          const title = notification.title || 'Notification';
+          const body = notification.body || 'New predictions published!';
+          showToast(`🔔 ${title}: ${body}`, 'success');
+        },
+        (notification) => {
+          console.log('[FCM] Notification clicked / opened:', notification);
+          // Gently route user based on push target references or presence of VIP
+          if (notification.data?.tab) {
+            setActiveTab(notification.data.tab);
+          } else if (notification.body?.toLowerCase().includes('vip')) {
+            setActiveTab('vip');
+          } else {
+            setActiveTab('free');
+          }
+        }
+      );
+    } else {
+      removePushNotificationListeners();
+    }
+  }, [currentUser?.uid]);
 
   // Listen to Firestore match predictions list inside real-time snapshot channel
   useEffect(() => {

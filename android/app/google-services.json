@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "149848705944",
+    "project_id": "cstips-147d2",
+    "storage_bucket": "cstips-147d2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:149848705944:android:099cf738a1427e69e7f9ed",
+        "android_client_info": {
+          "package_name": "com.ccwtips.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDV1CLuQJwye0kBv-pJfPI2SY7l53ErPEw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

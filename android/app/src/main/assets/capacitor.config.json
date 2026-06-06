@@ -1,0 +1,17 @@
+{
+	"appId": "com.ccwtips.app",
+	"appName": "Cash Cow VIP",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	},
+	"plugins": {
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		}
+	}
+}
