@@ -479,6 +479,7 @@ export default function App() {
 
         if (fbUser) {
           localStorage.setItem('last_logged_in_uid', fbUser.uid);
+          localStorage.setItem('is_authenticated_persist', 'true');
           const emailLower = fbUser.email?.toLowerCase() || '';
           const isAdminEmail = emailLower === 'ngimbabetwin@gmail.com' || emailLower === 'jilalamasanja1998@gmail.com';
           
@@ -604,9 +605,18 @@ export default function App() {
             console.warn("User profile live snapshot offline or limited network:", error);
           });
         } else {
-          setCurrentUser(null);
-          setAuthLoading(false); // Also unblock loading state when user is signed out
-          localStorage.removeItem('last_logged_in_uid');
+          const isPersisted = localStorage.getItem('is_authenticated_persist') === 'true';
+          const cachedLastUid = localStorage.getItem('last_logged_in_uid');
+          
+          if (isPersisted && cachedLastUid) {
+            // Keep using the cached session rather than kicking the user out due to temporary browser session drops
+            setAuthLoading(false);
+          } else {
+            setCurrentUser(null);
+            setAuthLoading(false); // Also unblock loading state when user is signed out
+            localStorage.removeItem('last_logged_in_uid');
+            localStorage.removeItem('is_authenticated_persist');
+          }
         }
       } catch (err) {
         console.error("Critical issue inside auth state listener logic:", err);
@@ -766,7 +776,14 @@ export default function App() {
       if (hasToday) {
         setSelectedDateId(today);
       } else {
-        setSelectedDateId(filteredDatesForSelector[0].id);
+        // Find the first date strictly greater than today (closest future/next date)
+        const nextDate = filteredDatesForSelector.find((d) => d.id > today);
+        if (nextDate) {
+          setSelectedDateId(nextDate.id);
+        } else {
+          // If no next date, make the latest old to be active by default (last item in sorted selector list)
+          setSelectedDateId(filteredDatesForSelector[filteredDatesForSelector.length - 1].id);
+        }
       }
     }
   }, [activeTab, filteredDatesForSelector, selectedDateId]);
@@ -821,6 +838,9 @@ export default function App() {
   // Sign out helper
   const handleSignOut = async () => {
     try {
+      localStorage.removeItem('last_logged_in_uid');
+      localStorage.removeItem('is_authenticated_persist');
+      setCurrentUser(null);
       await signOut(auth);
       showToast('Logged out of premium APK profile.', 'info');
     } catch (err) {
@@ -1026,6 +1046,11 @@ export default function App() {
           <AuthForm 
             onAuthSuccess={(usr) => {
               setCurrentUser(usr);
+              localStorage.setItem('last_logged_in_uid', usr.uid);
+              localStorage.setItem('is_authenticated_persist', 'true');
+              try {
+                localStorage.setItem(`cached_profile_${usr.uid}`, JSON.stringify(usr));
+              } catch (e) {}
               setActiveTab('free'); // Redirect to Free Tips Tab upon login or register
             }} 
             onShowNotification={showToast} 

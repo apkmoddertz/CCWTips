@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { 
   signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail
+  createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, createUserProfile, fetchUserProfile, db } from '../firebase';
@@ -25,13 +24,11 @@ interface AuthFormProps {
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotification }) => {
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotSuccess, setForgotSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -215,6 +212,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
         try {
           localStorage.setItem(`cached_profile_${fbUser.uid}`, JSON.stringify(fallbackProfile));
           localStorage.setItem('last_logged_in_uid', fbUser.uid);
+          localStorage.setItem('is_authenticated_persist', 'true');
         } catch (e) {
           // ignore
         }
@@ -236,32 +234,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
       }
     } catch (err: any) {
       console.error('Authentication Error:', err);
-      setError(getCleanAuthError(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setForgotSuccess('');
-    setLoading(true);
-
-    const email = forgotEmail.trim();
-    if (!email) {
-      setError('Please enter your email address to reset password.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setForgotSuccess('Success! A secure password reset link has been dispatched to your email address.');
-      onShowNotification('Password reset link sent successfully!', 'success');
-      setForgotEmail('');
-    } catch (err: any) {
-      console.error('Password Reset Error:', err);
       setError(getCleanAuthError(err));
     } finally {
       setLoading(false);
@@ -312,41 +284,30 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
         </div>
 
         {/* 4. Segmented Menu Switch bar Capsule / Header */}
-        {activeTab === 'forgot' ? (
-          <div className="text-center mb-6">
-            <h2 className="text-lg font-black text-[#F5C400] uppercase tracking-wide">
-              Reset Password
-            </h2>
-            <p className="text-slate-400 text-[11px] mt-1 px-4 leading-relaxed font-bold">
-              Enter your registered email address, and we'll dispatch a secure authorization link to reset your password.
-            </p>
-          </div>
-        ) : (
-          <div className="bg-[#050918]/80 max-w-sm w-full mx-auto p-1.5 rounded-full flex relative border border-slate-900/60 mb-6">
-            <button
-              onClick={() => { setActiveTab('login'); setError(''); setForgotSuccess(''); }}
-              type="button"
-              className={`w-1/2 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
-                activeTab === 'login'
-                  ? 'bg-[#F5C400] text-black shadow-lg font-black scale-100'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => { setActiveTab('register'); setError(''); setForgotSuccess(''); }}
-              type="button"
-              className={`w-1/2 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
-                activeTab === 'register'
-                  ? 'bg-[#F5C400] text-black shadow-lg font-black scale-100'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Register
-            </button>
-          </div>
-        )}
+        <div className="bg-[#050918]/80 max-w-sm w-full mx-auto p-1.5 rounded-full flex relative border border-slate-900/60 mb-6">
+          <button
+            onClick={() => { setActiveTab('login'); setError(''); }}
+            type="button"
+            className={`w-1/2 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
+              activeTab === 'login'
+                ? 'bg-[#F5C400] text-black shadow-lg font-black scale-100'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => { setActiveTab('register'); setError(''); }}
+            type="button"
+            className={`w-1/2 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
+              activeTab === 'register'
+                ? 'bg-[#F5C400] text-black shadow-lg font-black scale-100'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Register
+          </button>
+        </div>
 
         {/* Error / Success info banners */}
         {error && (
@@ -354,14 +315,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
             ⚠ {error}
           </div>
         )}
-        {forgotSuccess && (
-          <div className="bg-emerald-950/45 border border-emerald-900/40 text-emerald-300 text-xs py-2 px-4 rounded-full mb-4 font-bold text-center animate-fade-in">
-            ✓ {forgotSuccess}
-          </div>
-        )}
 
         {/* 5. Clean minimalist inputs and form controls */}
-        <form onSubmit={activeTab === 'forgot' ? handleForgotPassword : handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             {activeTab === 'login' && (
               <>
@@ -382,16 +338,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
                 />
-
-                <div className="text-right pr-2">
-                  <button
-                    type="button"
-                    onClick={() => { setActiveTab('forgot'); setError(''); setForgotSuccess(''); }}
-                    className="text-[11px] text-slate-400 hover:text-[#F5C400] font-bold transition-all underline decoration-dotted"
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
               </>
             )}
 
@@ -423,17 +369,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
                 />
               </>
             )}
-
-            {activeTab === 'forgot' && (
-              <input
-                type="email"
-                required
-                placeholder="Enter Registered Email Address"
-                value={forgotEmail}
-                onChange={(e) => setForgotEmail(e.target.value)}
-                className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
-              />
-            )}
           </div>
 
           {/* 6. Gold Pill Submit Button */}
@@ -449,23 +384,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
               </svg>
             ) : (
               <span>
-                {activeTab === 'login' ? 'Login' : activeTab === 'register' ? 'Create Account' : 'Send Reset Link'}
+                {activeTab === 'login' ? 'Login' : 'Create Account'}
               </span>
             )}
           </button>
-
-          {activeTab === 'forgot' && (
-            <div className="text-center mt-4">
-              <button
-                type="button"
-                onClick={() => { setActiveTab('login'); setError(''); setForgotSuccess(''); }}
-                className="inline-flex items-center gap-1.5 text-xs text-[#F5C400] font-bold hover:underline transition-all cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 text-[#F5C400]" />
-                Back to Login
-              </button>
-            </div>
-          )}
         </form>
       </div>
     </div>
