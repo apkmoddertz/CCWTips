@@ -265,7 +265,7 @@ function cleanUndefined<T extends object>(obj: T): T {
 
 export async function dbAddMatch(match: Omit<MatchTip, 'id'>): Promise<string> {
   const matchId = `match-${Date.now()}`;
-  const path = `cashcow_vip_tips/${matchId}`;
+  const path = `matches/${matchId}`;
   const payload = cleanUndefined({
     ...match,
     id: matchId,
@@ -273,7 +273,7 @@ export async function dbAddMatch(match: Omit<MatchTip, 'id'>): Promise<string> {
   });
 
   try {
-    await setDoc(doc(db, 'cashcow_vip_tips', matchId), payload);
+    await setDoc(doc(db, 'matches', matchId), payload);
     return matchId;
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
@@ -282,10 +282,10 @@ export async function dbAddMatch(match: Omit<MatchTip, 'id'>): Promise<string> {
 }
 
 export async function dbUpdateMatch(matchId: string, fields: Partial<MatchTip>): Promise<void> {
-  const path = `cashcow_vip_tips/${matchId}`;
+  const path = `matches/${matchId}`;
   const cleanedFields = cleanUndefined(fields);
   try {
-    await updateDoc(doc(db, 'cashcow_vip_tips', matchId), cleanedFields);
+    await updateDoc(doc(db, 'matches', matchId), cleanedFields);
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, path);
     throw error;
@@ -293,10 +293,10 @@ export async function dbUpdateMatch(matchId: string, fields: Partial<MatchTip>):
 }
 
 export async function dbDeleteMatch(matchId: string): Promise<void> {
-  const path = `cashcow_vip_tips/${matchId}`;
+  const path = `matches/${matchId}`;
   try {
     // Copy to recycle_bin first if it exists
-    const matchSnap = await getDoc(doc(db, 'cashcow_vip_tips', matchId));
+    const matchSnap = await getDoc(doc(db, 'matches', matchId));
     if (matchSnap.exists()) {
       const matchData = matchSnap.data();
       const backupId = `deleted-${matchId}-${Date.now()}`;
@@ -311,7 +311,7 @@ export async function dbDeleteMatch(matchId: string): Promise<void> {
   }
 
   try {
-    await deleteDoc(doc(db, 'cashcow_vip_tips', matchId));
+    await deleteDoc(doc(db, 'matches', matchId));
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, path);
     throw error;
@@ -342,123 +342,8 @@ export async function seedMatchesIfEmpty(force: boolean = false): Promise<void> 
   return;
 }
 
-// Data recovery system to restore matches from the user's screenshots
+// Data recovery system is disabled to keep predictions strictly custom-assigned by admin
 export async function restoreScreenshotMatches(): Promise<number> {
-  const SCREENSHOT_RECOVERY_MATCHES: Omit<MatchTip, 'id'>[] = [
-    // --- JUNE 06 (Tomorrow SAT 06) ---
-    // Free Tips
-    {
-      homeTeam: 'Paraguay',
-      awayTeam: 'Nicaragua',
-      time: '01:15',
-      prediction: 'Home win',
-      odds: 1.20,
-      status: 'pending',
-      type: 'free',
-      dateId: '2026-06-06'
-    },
-    {
-      homeTeam: 'Crown Legacy',
-      awayTeam: 'Philadelphia II',
-      time: '02:00',
-      prediction: 'Home Or Draw',
-      odds: 1.27,
-      status: 'pending',
-      type: 'free',
-      dateId: '2026-06-06'
-    },
-
-    // --- JUNE 05 (Today FRI 05) ---
-    // VIP Tips
-    {
-      homeTeam: 'Russia',
-      awayTeam: 'Burkina Faso',
-      time: '20:00',
-      prediction: 'HT/FT: 1/1',
-      odds: 2.10,
-      status: 'pending',
-      type: 'vip',
-      dateId: '2026-06-05'
-    },
-    {
-      homeTeam: 'Logan Lightning',
-      awayTeam: 'Capalaba',
-      time: '13:30',
-      prediction: 'Under 2.5Goals',
-      odds: 3.50,
-      status: 'win',
-      type: 'vip',
-      dateId: '2026-06-05'
-    },
-
-    // --- JUNE 04 (Yesterday THU 04) ---
-    // VIP Tips
-    {
-      homeTeam: 'Lesotho',
-      awayTeam: 'Kenya',
-      time: '16:00',
-      prediction: 'Away/Away',
-      odds: 2.90,
-      status: 'lose',
-      type: 'vip',
-      dateId: '2026-06-04'
-    },
-    {
-      homeTeam: 'France',
-      awayTeam: 'Ivory Coast',
-      time: '22:10',
-      prediction: 'Home win',
-      odds: 1.30,
-      status: 'lose',
-      type: 'vip',
-      dateId: '2026-06-04'
-    },
-
-    // Free Tips
-    {
-      homeTeam: 'Laholms',
-      awayTeam: 'Hassleholms IF',
-      time: '20:00',
-      prediction: 'Draw Or Away',
-      odds: 1.20,
-      status: 'win',
-      type: 'free',
-      dateId: '2026-06-04'
-    },
-    {
-      homeTeam: 'SSA U20',
-      awayTeam: 'Galicia U20',
-      time: '15:00',
-      prediction: 'Home Or Draw',
-      odds: 1.20,
-      status: 'lose',
-      type: 'free',
-      dateId: '2026-06-04'
-    }
-  ];
-
-  let restoredCount = 0;
-  try {
-    // Fetch all existing matches to compare
-    const snapshot = await getDocs(collection(db, 'cashcow_vip_tips'));
-    const existing = snapshot.docs.map(doc => doc.data() as MatchTip);
-
-    for (const item of SCREENSHOT_RECOVERY_MATCHES) {
-      // Avoid duplication by comparing identifying traits
-      const alreadyExists = existing.some(m => 
-        m.homeTeam.trim().toLowerCase() === item.homeTeam.trim().toLowerCase() &&
-        m.awayTeam.trim().toLowerCase() === item.awayTeam.trim().toLowerCase() &&
-        m.dateId === item.dateId &&
-        m.type === item.type
-      );
-
-      if (!alreadyExists) {
-        await dbAddMatch(item);
-        restoredCount++;
-      }
-    }
-  } catch (error) {
-    console.error('Error executing screenshot recovery restore:', error);
-  }
-  return restoredCount;
+  console.log('Restore screenshot matches system disabled to prevent default/template overrides.');
+  return 0;
 }

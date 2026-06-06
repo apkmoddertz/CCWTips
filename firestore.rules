@@ -187,8 +187,8 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // 3. Matches tipping collection (updated to cashcow_vip_tips)
-    match /cashcow_vip_tips/{matchId} {
+    // 3. Matches tipping collection
+    match /matches/{matchId} {
       // Free predictions are readable by any authenticated member.
       // Premium predictions (VIP) are strictly locked and can only be accessed by whitelisted admins or premium members.
       allow read: if isSignedIn() && (

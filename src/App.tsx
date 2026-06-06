@@ -629,7 +629,7 @@ export default function App() {
     // No automatic background seeding of matches on boot to preserve a pristine database for live users.
 
     setMatchesLoading(true);
-    const q = collection(db, 'cashcow_vip_tips');
+    const q = collection(db, 'matches');
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const dbMatches: MatchTip[] = [];
       snapshot.forEach((doc) => {
@@ -667,7 +667,7 @@ export default function App() {
 
     const intervalId = setInterval(async () => {
       try {
-        const q = collection(db, 'cashcow_vip_tips');
+        const q = collection(db, 'matches');
         const snapshot = await getDocs(q);
         const dbMatches: MatchTip[] = [];
         snapshot.forEach((doc) => {

@@ -168,7 +168,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       const originalId = item.id;
       const { backupId, deletedAt, ...originalFields } = item;
       
-      const docRef = doc(db, 'cashcow_vip_tips', originalId);
+      const docRef = doc(db, 'matches', originalId);
       await setDoc(docRef, {
         ...originalFields,
         createdAt: new Date().toISOString()

@@ -71,7 +71,7 @@
       "schema": "User",
       "description": "User documents mapping firebase auth uid to user record."
     },
-    "cashcow_vip_tips/{matchId}": {
+    "matches/{matchId}": {
       "schema": "MatchTip",
       "description": "Prediction tips dataset in Firestore."
     },
