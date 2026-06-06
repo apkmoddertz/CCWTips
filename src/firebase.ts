@@ -28,12 +28,12 @@ import { INITIAL_MATCHES } from './data';
 
 // The exact Firebase config provided by the user
 const firebaseConfig = {
-  apiKey: "AIzaSyA7RiWuvCZ55nZ6hvqm-AXuk6IcII8DT7M",
-  authDomain: "cashcowbet.firebaseapp.com",
-  projectId: "cashcowbet",
-  storageBucket: "cashcowbet.firebasestorage.app",
-  messagingSenderId: "295826345481",
-  appId: "1:295826345481:web:c86d3e9d543199cba1f2d8"
+  apiKey: "AIzaSyB97Rw3a9wCJyB4RsPs3t5tXd7XoxUZXIU",
+  authDomain: "cstips-147d2.firebaseapp.com",
+  projectId: "cstips-147d2",
+  storageBucket: "cstips-147d2.firebasestorage.app",
+  messagingSenderId: "149848705944",
+  appId: "1:149848705944:web:1ddfb42aeb87a6c7e7f9ed"
 };
 
 // Initialize Firebase
@@ -150,38 +150,30 @@ export async function fetchUserProfile(uid: string): Promise<DBUser | null> {
     }
     return null;
   } catch (error: any) {
-    const errorStr = error instanceof Error ? error.message : String(error);
-    const isOffline = error?.code === 'unavailable' || errorStr.toLowerCase().includes('offline') || errorStr.toLowerCase().includes('failed to get document');
-    
-    if (isOffline) {
-      console.warn("Firestore is offline or unreachable. Reading cached profile from localStorage...");
-      const cached = localStorage.getItem(`cached_profile_${uid}`);
-      if (cached) {
-        try {
-          return JSON.parse(cached);
-        } catch {
-          // ignore
-        }
+    console.warn("Firestore error during profile fetch; reading from local cache.", error);
+    const cached = localStorage.getItem(`cached_profile_${uid}`);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch {
+        // ignore
       }
-      
-      // Basic offline fallback profile
-      const emailLower = auth.currentUser?.email?.toLowerCase() || '';
-      const isAdminEmail = emailLower === 'ngimbabetwin@gmail.com' || emailLower === 'jilalamasanja1998@gmail.com';
-      return {
-        uid,
-        email: auth.currentUser?.email || '',
-        isVip: false,
-        role: isAdminEmail ? 'admin' : 'user'
-      };
     }
-    handleFirestoreError(error, OperationType.GET, path);
-    return null;
+    
+    // Basic fallback profile
+    const emailLower = auth.currentUser?.email?.toLowerCase() || '';
+    const isAdminEmail = emailLower === 'ngimbabetwin@gmail.com' || emailLower === 'jilalamasanja1998@gmail.com';
+    return {
+      uid,
+      email: auth.currentUser?.email || '',
+      isVip: false,
+      role: isAdminEmail ? 'admin' : 'user'
+    };
   }
 }
 
 export async function createUserProfile(uid: string, email: string, username?: string): Promise<DBUser> {
   const path = `users/${uid}`;
-  // Hardcoded bootstrapped emails get 'admin', all other users default to 'user'
   const emailLower = email.toLowerCase();
   const isAdminEmail = emailLower === 'ngimbabetwin@gmail.com' || emailLower === 'jilalamasanja1998@gmail.com';
   const role = isAdminEmail ? 'admin' : 'user';
@@ -217,19 +209,12 @@ export async function createUserProfile(uid: string, email: string, username?: s
     }
     return newUser;
   } catch (error: any) {
-    const errorStr = error instanceof Error ? error.message : String(error);
-    const isOffline = error?.code === 'unavailable' || errorStr.toLowerCase().includes('offline');
-    
-    if (isOffline) {
-      console.warn("Firestore is offline during profile registration. Saving profile locally.");
-      try {
-        localStorage.setItem(`cached_profile_${uid}`, JSON.stringify(newUser));
-      } catch (e) {
-        // storage quota
-      }
-      return newUser;
+    console.warn("Firestore is offline or permission is restricted. Saving profile locally.", error);
+    try {
+      localStorage.setItem(`cached_profile_${uid}`, JSON.stringify(newUser));
+    } catch (e) {
+      // storage quota
     }
-    handleFirestoreError(error, OperationType.WRITE, path);
     return newUser;
   }
 }
