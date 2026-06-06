@@ -28,6 +28,7 @@ import {
   Clock
 } from 'lucide-react';
 import { getEATExpirationTimestamp } from './VipCountdown';
+import { UserPaymentReceipts } from './UserPaymentReceipts';
 
 interface VIPPlansProps {
   plans: VIPPlan[];
@@ -622,176 +623,11 @@ export const VIPPlans: React.FC<VIPPlansProps> = ({
       )}
 
       {/* USER PAYMENT RECEIPTS HISTORY */}
-      <div className="mt-8 border-t border-[#161C30]/80 pt-6" id="user_receipts_history_container">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-heading font-extrabold text-[12px] text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-[#F5C400]" />
-            My Payment Receipts
-          </h3>
-          <span className="text-[9px] font-mono font-bold text-[#F5C400] bg-[#F5C400]/10 px-2.5 py-0.5 rounded-full border border-[#F5C400]/20 select-none">
-            {userReceipts.length} Submitted
-          </span>
-        </div>
-
-        {userReceiptsLoading ? (
-          <div className="py-8 text-center bg-[#0C1122]/40 rounded-2xl border border-[#161C30] text-slate-500 text-[11px] font-mono uppercase tracking-widest flex flex-col items-center justify-center gap-2">
-            <svg className="animate-spin h-5 w-5 text-[#F5C400]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Loading Receipts Stream...
-          </div>
-        ) : userReceipts.length === 0 ? (
-          <div className="py-8 px-4 text-center bg-[#070b19]/60 rounded-2xl border border-dashed border-[#161C30] hover:border-slate-850 transition">
-            <ImageIcon className="w-7 h-7 text-slate-650 mx-auto mb-2" />
-            <p className="text-[11px] text-slate-500 font-semibold">No payment receipts submitted yet.</p>
-            <p className="text-[9.5px] text-slate-500 mt-0.5 max-w-[285px] mx-auto">Click any of the premium pass cards above to draft a secure membership request receipt.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4.5">
-            {userReceipts.map((rcpt) => {
-              const isPending = rcpt.status === 'pending';
-              const isApproved = rcpt.status === 'approved';
-              const isRejected = rcpt.status === 'rejected';
-              
-              // Local mobile currency equivalents helpers
-              let estimatedLocalText = '';
-              const isKe = rcpt.paymentMethod?.toLowerCase().includes('kenya');
-              const isTz = rcpt.paymentMethod?.toLowerCase().includes('tanzania');
-              if (isKe && rcpt.planPrice) {
-                estimatedLocalText = `≈ ${(Math.round(rcpt.planPrice * 135)).toLocaleString()} KES`;
-              } else if (isTz && rcpt.planPrice) {
-                estimatedLocalText = `≈ ${(Math.round(rcpt.planPrice * 2600)).toLocaleString()} TZS`;
-              }
-
-              return (
-                <div 
-                  key={rcpt.id} 
-                  className="bg-gradient-to-br from-[#0D1222] to-[#080B17] border border-[#1E2538] hover:border-slate-700/80 rounded-2xl p-4 shadow-md transition-all duration-300 relative overflow-hidden flex flex-col gap-3"
-                >
-                  {/* Left decorative color banner for status color */}
-                  <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-r-lg ${
-                    isApproved ? 'bg-emerald-500' : isRejected ? 'bg-rose-500' : 'bg-amber-500'
-                  }`} />
-                  
-                  {/* Header row with plan details and status badge */}
-                  <div className="flex justify-between items-start pl-1.5 gap-1">
-                    <div className="space-y-0.5">
-                      <span className="text-[8.5px] uppercase font-mono font-bold tracking-wider text-slate-500 block">VIP MEMBERSHIP</span>
-                      <h4 className="text-white text-xs font-black uppercase font-heading tracking-tight flex items-center gap-1.5">
-                        <Award className="w-4 h-4 text-[#F5C400]" />
-                        {rcpt.planDuration} VIP Access
-                      </h4>
-                    </div>
-
-                    <div className="text-right">
-                      {isApproved && (
-                        <span className="bg-emerald-500/10 border border-emerald-500/25 text-emerald-450 font-extrabold text-[8.5px] uppercase tracking-wider px-2.5 py-0.5 rounded-full select-none inline-block">
-                          Approved
-                        </span>
-                      )}
-                      {isRejected && (
-                        <span className="bg-red-500/10 border border-red-500/25 text-rose-500 font-extrabold text-[8.5px] uppercase tracking-wider px-2.5 py-0.5 rounded-full select-none inline-block">
-                          Rejected
-                        </span>
-                      )}
-                      {isPending && (
-                        <span className="bg-amber-500/10 border border-amber-500/25 text-amber-500 font-extrabold text-[8.5px] uppercase tracking-wider px-2.5 py-0.5 rounded-full select-none inline-block animate-pulse">
-                          Pending
-                        </span>
-                      )}
-                      <span className="block text-[7.5px] font-mono text-slate-500 mt-1 uppercase select-none">
-                        {rcpt.submittedAt ? new Date(rcpt.submittedAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Pricing grid and receipt details */}
-                  <div className="grid grid-cols-2 gap-2 pl-1.5 bg-slate-950/40 p-2.5 rounded-xl border border-slate-900/60 text-xs">
-                    <div className="space-y-0.5">
-                      <span className="text-[8px] font-mono uppercase text-slate-500 block">Total Cost Paid</span>
-                      <div className="flex items-baseline gap-1">
-                        <DollarSign className="w-3 h-3 text-[#F5C400]" />
-                        <span className="text-[11px] font-mono font-black text-slate-100">
-                          {rcpt.planPrice?.toFixed(2)} USD
-                        </span>
-                        {estimatedLocalText && (
-                          <span className="text-[8.5px] text-emerald-400 font-mono block shrink-0 font-bold">
-                            {estimatedLocalText}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="text-[8px] font-mono uppercase text-slate-550 block">Gateway Address / Phone</span>
-                      <span className="text-[10px] text-slate-300 font-mono font-black break-all select-all block leading-none">
-                        {rcpt.txHashOrPhone}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* System Receipt Proof Thumbnail Preview with zoom overlay */}
-                  {rcpt.screenshot && (
-                    <div className="pl-1.5 space-y-1.5">
-                      <div className="text-[8.5px] font-mono text-slate-500 uppercase flex items-center gap-1 font-bold">
-                        <ImageIcon className="w-3.5 h-3.5 text-[#F5C400]" /> Screenshot uploaded proof
-                      </div>
-                      <div 
-                        onClick={() => setUserSelectedReceiptUrl(rcpt.screenshot)}
-                        className="relative h-28 rounded-xl overflow-hidden bg-slate-950 border border-[#1E2538] flex items-center justify-center cursor-zoom-in group hover:border-[#F5C400]/40 transition duration-300 shadow-inner"
-                      >
-                        <img 
-                          src={rcpt.screenshot} 
-                          alt="Submitted Premium Proof" 
-                          className="h-full w-full object-contain pointer-events-none group-hover:scale-[1.01] transition duration-350"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1.5 transition duration-200">
-                          <Eye className="w-4.5 h-4.5 text-[#F5C400]" />
-                          <span className="text-[9.5px] font-black uppercase text-white tracking-widest">Zoom Receipt</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* approved dynamic access period */}
-                  {isApproved && rcpt.vipStartDate && rcpt.vipEndDate && (
-                    <div className="mx-1.5 p-2 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-[9px] font-mono text-emerald-400/90 leading-none pl-2 flex items-center gap-1 font-bold">
-                      <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-                      Access Active: {rcpt.vipStartDate} to {rcpt.vipEndDate}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* FULLSCREEN LIGHTBOX FOR USER SUBMITTED RECEIPTS */}
-      {userSelectedReceiptUrl && (
-        <div className="fixed inset-0 bg-black/98 z-[200] flex flex-col items-center justify-center p-4 select-none animate-fade-in animate-duration-200">
-          <div className="max-w-[440px] w-full flex flex-col items-center">
-            <div className="w-full flex justify-end mb-2">
-              <button 
-                type="button"
-                onClick={() => setUserSelectedReceiptUrl(null)}
-                className="bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-full px-3.5 py-1.5 text-[9.5px] tracking-wider font-extrabold uppercase transition cursor-pointer"
-              >
-                Close Zoom ✕
-              </button>
-            </div>
-            <div className="w-full bg-[#070b1a] border border-[#1E2538] rounded-2xl overflow-hidden p-2 flex items-center justify-center max-h-[80vh] shadow-2xl relative">
-              <img 
-                src={userSelectedReceiptUrl} 
-                alt="Fullscreen proof receipt zoom" 
-                className="max-h-[75vh] w-full object-contain rounded-lg"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      <UserPaymentReceipts 
+        userReceipts={userReceipts} 
+        userReceiptsLoading={userReceiptsLoading} 
+        onShowNotification={onShowNotification} 
+      />
 
       {/* --- PREMIUUM MULTI-STAGE APK PAYMENT FLOW --- */}
       {checkoutPlan && (

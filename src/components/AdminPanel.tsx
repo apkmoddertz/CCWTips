@@ -5,6 +5,7 @@ import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from 'firebase
 import { Key, Plus, RefreshCw, X, Shield, PlusCircle, CheckCircle, Database, Settings, Sparkles, Users, Trash2, Calendar, User, Mail, DollarSign, Copy, Eye, Image, Search, ShieldCheck, ShieldAlert, Lock, Check, Download, Share2 } from 'lucide-react';
 import { DateTimeRowPicker } from './DateTimePicker';
 import { exportReceiptToPNG } from '../utils/canvasExporter';
+import { AdminReceiptsManager } from './AdminReceiptsManager';
 
 // --- DAR ES SALAAM (EAST AFRICA TIME, UTC+3) DATE-TIME HELPERS ---
 const getEATDate = (date: Date = new Date()): Date => {
@@ -593,6 +594,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           )}
 
           {activeSubTab === 'payments' && (
+            <AdminReceiptsManager 
+              paymentsList={paymentsList} 
+              paymentsLoading={paymentsLoading} 
+              onRefreshList={fetchPayments} 
+              onShowNotification={onShowNotification} 
+            />
+          )}
+
+          {activeSubTab === 'payments_old_backup' && (
             /* Payments Verification Dashboard */
             <div className="space-y-3.5">
               <div className="flex items-center justify-between border-b border-slate-800/60 pb-1.5 flex-shrink-0 gap-2">
