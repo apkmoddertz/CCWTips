@@ -103,85 +103,21 @@ const getCalendarDates = (matchesList: MatchTip[]): DateItem[] => {
 
 // --- HIGH-TECH PREMIUM LINEUP ANALYZER EFFECT FOR EMPTY STATE ---
 const LineupAnalyzerEffect = () => {
-  const steps = [
-    'Connecting to sports feeds...',
-    'Decrypting starting lineup sheets...',
-    'Evaluating player momentum indices...',
-    'Cross-validating market odds...',
-    'Simulating match probabilities...',
-    'Finalizing secure premium tips...'
-  ];
-  const [currentStep, setCurrentStep] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length);
-    }, 2800);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-[#0D1222]/85 to-[#060914]/95 border border-[#1E2538]/90 rounded-[28px] p-6 py-8 text-center shadow-2xl flex flex-col items-center">
-      {/* Stylesheet injector for sweep animations */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes sweep_effect {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-        .animate-sweep-effect {
-          animation: sweep_effect 1.8s infinite linear;
-        }
-      `}} />
-
-      {/* Decorative cybernetic grid overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(245,196,0,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(245,196,0,0.012)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-40"></div>
-      
-      {/* Glowing top line */}
-      <div className="absolute top-0 left-12 right-12 h-[1px] bg-gradient-to-r from-transparent via-[#F5C400]/40 to-transparent"></div>
-
-      {/* Radar Concentric rings */}
-      <div className="relative w-24 h-24 flex items-center justify-center mb-6">
-        <div className="absolute inset-0 rounded-full bg-[#F5C400]/5 border border-[#F5C400]/10 animate-ping opacity-60"></div>
-        <div className="absolute inset-2 rounded-full bg-indigo-500/5 border border-indigo-500/10 animate-ping opacity-30" style={{ animationDelay: '1s' }}></div>
-        
-        <div className="absolute inset-0 rounded-full border-2 border-dashed border-slate-800/40 animate-spin" style={{ animationDuration: '16s' }}></div>
-        <div className="absolute inset-3 rounded-full border border-dashed border-indigo-500/15 animate-spin" style={{ animationDuration: '8s', animationDirection: 'reverse' }}></div>
-        <div className="absolute inset-6 rounded-full border border-slate-700/20"></div>
-        
-        <div className="relative w-12 h-12 rounded-full bg-[#0D1222] border-2 border-[#1E2538] shadow-[inset_0_0_12px_rgba(245,196,0,0.15)] flex items-center justify-center text-[#F5C400]">
-          <Sparkles className="w-5 h-5 animate-pulse text-[#F5C450] drop-shadow-[0_0_6px_rgba(245,196,0,0.6)]" />
+    <div className="relative overflow-hidden w-full bg-gradient-to-b from-[#0D1222]/40 to-[#060914]/60 border border-[#1E2538]/40 rounded-[28px] p-12 text-center shadow-xl flex flex-col items-center justify-center min-h-[280px]">
+      {/* Absolute center rotating glowing gold loaders */}
+      <div className="relative w-16 h-16 flex items-center justify-center">
+        {/* Pulsing golden base aura */}
+        <div className="absolute inset-0 rounded-full bg-[#F5C400]/5 border border-[#F5C400]/15 animate-pulse"></div>
+        {/* Rapid inner spinning loader ring */}
+        <div className="absolute inset-1 rounded-full border border-dashed border-[#F5C400]/25 animate-spin" style={{ animationDuration: '3s' }}></div>
+        {/* Solid active golden accent rotater ring */}
+        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#F5C400] animate-spin"></div>
+        {/* Center glowing golden beacon dot */}
+        <div className="relative w-7 h-7 rounded-full bg-[#070A14] border border-[#1E2538] flex items-center justify-center">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#F5C400] shadow-[0_0_8px_#F5C400] animate-ping"></div>
         </div>
-
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5C400] shadow-[0_0_8px_#F5C400] animate-bounce"></div>
       </div>
-
-      {/* Main scanning message */}
-      <div className="relative z-10 space-y-1">
-        <span className="text-[8px] font-mono font-black text-[#F5C400] tracking-[0.25em] bg-[#F5C400]/10 border border-[#F5C400]/25 px-3 py-1 rounded-full uppercase select-none">
-          Live Analysis Engine
-        </span>
-        <h4 className="text-sm font-sans font-black text-white uppercase tracking-tight mt-3">
-          Analyzing Match Lineups
-        </h4>
-      </div>
-
-      {/* Status Tape */}
-      <div className="relative w-full max-w-[270px] h-7.5 mt-4 flex items-center justify-center border border-slate-850/60 bg-slate-950/70 rounded-full px-4 overflow-hidden shadow-inner">
-        <span className="text-[10px] font-mono font-extrabold text-slate-300 uppercase tracking-wider animate-pulse flex items-center gap-1.5">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-          {steps[currentStep]}
-        </span>
-      </div>
-
-      {/* Smooth Sweep Loading Indicator progress */}
-      <div className="w-40 h-[3px] bg-slate-950 rounded-full mt-4 overflow-hidden relative border border-slate-900/40">
-        <div className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-transparent via-[#F5C400] to-transparent w-20 animate-sweep-effect"></div>
-      </div>
-
-      {/* Descriptive sub paragraph */}
-      <p className="text-slate-500 text-[11px] mt-4.5 max-w-[290px] mx-auto leading-relaxed font-medium">
-        Our elite tipsters are assessing formations, team news, and late pitch conditions for this date. Predictions will be authorized shortly!
-      </p>
     </div>
   );
 };

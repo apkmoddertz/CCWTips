@@ -5,7 +5,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, createUserProfile, fetchUserProfile, db } from '../firebase';
-import { Mail, Lock, Sparkles, HelpCircle, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Sparkles, HelpCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 const cowLogo = "https://i.ibb.co/Lhzt1vX1/cashcowlogo.png";
 
 interface AuthFormProps {
@@ -31,6 +31,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Parse neat error from Auth Provider
   const getCleanAuthError = (err: any): string => {
@@ -241,11 +242,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
   };
 
   return (
-    <div className="w-full min-h-full bg-gradient-to-br from-[#061438] via-[#040816] to-[#3a4f0b] flex flex-col justify-between py-12 px-6 relative overflow-hidden select-none">
+    <div className="w-full h-full min-h-screen sm:min-h-full bg-gradient-to-br from-[#061438] via-[#040816] to-[#3a4f0b] flex flex-col justify-between py-6 px-6 relative overflow-hidden select-none">
       
       {/* 1. Neon Green Dollar Chain dropping from top center */}
       <div className="absolute top-0 inset-x-0 flex flex-col items-center pointer-events-none z-0">
-        <div className="flex flex-col text-[#00E676] font-extrabold text-lg leading-[12px] opacity-40 py-2 select-none tracking-widest">
+        <div className="flex flex-col text-[#00E676] font-extrabold text-xs sm:text-lg leading-[10px] sm:leading-[12px] opacity-40 py-1 sm:py-2 select-none tracking-widest">
           <span className="text-[#00E676] scale-110 drop-shadow-[0_0_10px_#00E676]">$</span>
           <span>$</span>
           <span>$</span>
@@ -256,15 +257,15 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
       </div>
 
       {/* Main Content Card Container */}
-      <div className="w-full flex-1 flex flex-col justify-center max-w-sm mx-auto z-10">
+      <div className="w-full flex-1 flex flex-col justify-center max-w-sm mx-auto z-10 py-2">
         
         {/* 2. Cute Rounded Cow Head graphic with glowing backshadow halo */}
-        <div className="text-center mt-4 mb-4">
-          <div className="relative inline-flex items-center justify-center w-28 h-28 rounded-full bg-transparent overflow-hidden mx-auto mb-3">
+        <div className="text-center mt-2 mb-2 sm:mt-4 sm:mb-4">
+          <div className="relative inline-flex items-center justify-center w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-transparent overflow-hidden mx-auto mb-2 sm:mb-3">
             {/* Outer golden halo sphere ring */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-t from-[#F5C400] via-[#F5C400]/40 to-transparent opacity-60 blur-md animate-pulse" />
             
-            <div className="relative w-24 h-24 rounded-full border-2 border-[#F5C400] bg-[#020512] flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(245,196,0,0.6)]">
+            <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-full border-2 border-[#F5C400] bg-[#020512] flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(245,196,0,0.6)]">
               <img 
                 src={cowLogo} 
                 alt="Cash Cow VIP" 
@@ -278,17 +279,17 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
           </div>
 
           {/* 3. Bold Gold Display Title */}
-          <h1 className="text-3xl font-black text-[#F5C400] uppercase tracking-tight font-sans text-center drop-shadow-[0_2px_8px_rgba(245,196,0,0.4)]">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#F5C400] uppercase tracking-tight font-sans text-center drop-shadow-[0_2px_8px_rgba(245,196,0,0.4)]">
             Cash Cow VIP
           </h1>
         </div>
 
         {/* 4. Segmented Menu Switch bar Capsule / Header */}
-        <div className="bg-[#050918]/80 max-w-sm w-full mx-auto p-1.5 rounded-full flex relative border border-slate-900/60 mb-6">
+        <div className="bg-[#050918]/80 max-w-sm w-full mx-auto p-1 rounded-full flex relative border border-slate-900/60 mb-4 sm:mb-6">
           <button
-            onClick={() => { setActiveTab('login'); setError(''); }}
+            onClick={() => { setActiveTab('login'); setError(''); setShowPassword(false); }}
             type="button"
-            className={`w-1/2 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
+            className={`w-1/2 py-2 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
               activeTab === 'login'
                 ? 'bg-[#F5C400] text-black shadow-lg font-black scale-100'
                 : 'text-slate-400 hover:text-white'
@@ -297,9 +298,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
             Login
           </button>
           <button
-            onClick={() => { setActiveTab('register'); setError(''); }}
+            onClick={() => { setActiveTab('register'); setError(''); setShowPassword(false); }}
             type="button"
-            className={`w-1/2 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
+            className={`w-1/2 py-2 text-xs font-black uppercase tracking-wider transition-all duration-300 rounded-full flex items-center justify-center gap-1.5 ${
               activeTab === 'register'
                 ? 'bg-[#F5C400] text-black shadow-lg font-black scale-100'
                 : 'text-slate-400 hover:text-white'
@@ -311,62 +312,86 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
 
         {/* Error / Success info banners */}
         {error && (
-          <div className="bg-rose-950/45 border border-rose-900/40 text-rose-300 text-xs py-2 px-4 rounded-full mb-4 font-bold text-center">
+          <div className="bg-rose-950/45 border border-rose-900/40 text-rose-300 text-xs py-1.5 px-4 rounded-full mb-3 sm:mb-4 font-bold text-center">
             ⚠ {error}
           </div>
         )}
 
         {/* 5. Clean minimalist inputs and form controls */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {activeTab === 'login' && (
               <>
-                <input
-                  type="text"
-                  required
-                  placeholder="Username or Email"
-                  value={emailOrUsername}
-                  onChange={(e) => setEmailOrUsername(e.target.value)}
-                  className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
-                />
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Username or Email"
+                    value={emailOrUsername}
+                    onChange={(e) => setEmailOrUsername(e.target.value)}
+                    className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3 sm:py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
+                  />
+                </div>
                 
-                <input
-                  type="password"
-                  required
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
-                />
+                <div className="relative w-full">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full pl-6 pr-12 py-3 sm:py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-5 inset-y-0 flex items-center text-slate-400 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </>
             )}
 
             {activeTab === 'register' && (
               <>
-                <input
-                  type="text"
-                  required
-                  placeholder="Username"
-                  value={regUsername}
-                  onChange={(e) => setRegUsername(e.target.value)}
-                  className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
-                />
-                <input
-                  type="email"
-                  required
-                  placeholder="Email"
-                  value={regEmail}
-                  onChange={(e) => setRegEmail(e.target.value)}
-                  className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
-                />
-                <input
-                  type="password"
-                  required
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
-                />
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Username"
+                    value={regUsername}
+                    onChange={(e) => setRegUsername(e.target.value)}
+                    className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3 sm:py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
+                  />
+                </div>
+                <div className="relative w-full">
+                  <input
+                    type="email"
+                    required
+                    placeholder="Email"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full px-6 py-3 sm:py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
+                  />
+                </div>
+                <div className="relative w-full">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[#050918]/90 border border-[#0F162A]/60 focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/40 outline-none rounded-full pl-6 pr-12 py-3 sm:py-3.5 text-xs text-white placeholder:text-slate-500 font-sans tracking-wide transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-5 inset-y-0 flex items-center text-slate-400 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </>
             )}
           </div>
@@ -375,7 +400,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, onShowNotific
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#F5C400] hover:bg-[#E2B200] active:scale-97 text-black text-xs font-black uppercase py-4 rounded-full transition-all duration-200 mt-4 shadow-[0_4px_15px_rgba(245,196,0,0.3)] flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
+            className="w-full bg-[#F5C400] hover:bg-[#E2B200] active:scale-97 text-black text-xs font-black uppercase py-3 sm:py-4 rounded-full transition-all duration-200 mt-2 sm:mt-4 shadow-[0_4px_15px_rgba(245,196,0,0.3)] flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <svg className="animate-spin h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
