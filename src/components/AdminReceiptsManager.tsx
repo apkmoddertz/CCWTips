@@ -762,7 +762,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[#060813] text-slate-100 select-none pb-8">
+    <div className="flex-1 overflow-y-auto bg-[#060813] text-slate-100 select-none pb-8 scrollbar-none">
       
       {/* HEADER SECTION */}
       <div className="p-5 border-b border-[#141B2E] bg-slate-950 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1013,7 +1013,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
       )}
 
       {/* 3. SCROLLING MAIN TIMELINE RECEIPTS LIST */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-none">
+      <div className="p-5 space-y-6">
         {paymentsLoading ? (
           <div className="py-24 text-center text-slate-500 text-[11px] font-mono tracking-widest flex flex-col items-center justify-center gap-3 animate-pulse uppercase font-black">
             <RefreshCw className="w-6 h-6 text-[#F5C400] animate-spin" />
@@ -1125,31 +1125,31 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                           </div>
                         </div>
 
-                        {/* COMPREHENSIVE FINANCIAL INFORMATION GRID PANEL (Moved to top of screenshot) */}
-                        <div className="bg-[#050711] p-3.5 rounded-[22px] border border-slate-900/60 font-mono text-[10px] select-text grid grid-cols-2 gap-3.5 leading-tight">
+                        {/* 1. TOP WARNING-STYLE VIP & AUTH SUMMARY */}
+                        <div className="bg-[#1C1604] p-3.5 rounded-[22px] border border-[#F5C400]/25 font-mono text-[10px] select-text grid grid-cols-2 gap-3.5 leading-tight shadow-[0_0_12px_rgba(245,196,0,0.03)]">
                           
                           <div className="space-y-1">
-                            <span className="text-[7.5px] text-[#F5C400] uppercase tracking-widest block leading-none font-bold">
+                            <span className="text-[7.5px] text-[#F5C400] uppercase tracking-widest block leading-none font-black">
                               CLIENT AUTH
                             </span>
-                            <div className="bg-[#0D1222]/40 p-2.5 rounded-xl space-y-1.5 border border-slate-900/60">
+                            <div className="bg-[#0F1322]/60 p-2.5 rounded-xl space-y-1.5 border border-slate-900/90 shadow-inner">
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-slate-500 text-[6.5px] tracking-wider uppercase font-extrabold">PROFILE</span>
                                 <span className="text-white font-black block truncate text-[10.5px] uppercase">
                                   {pay.username || 'JZON'}
                                 </span>
                               </div>
-                              <div className="border-t border-slate-900/40 pt-1 text-slate-500 text-[8px] truncate">
+                              <div className="border-t border-slate-900/40 pt-1 text-slate-400 text-[8px] truncate">
                                 UID: {pay.userId || 'w4Qvob...'}
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-1">
-                            <span className="text-[7.5px] text-[#F5C400] uppercase tracking-widest block leading-none font-bold">
+                            <span className="text-[7.5px] text-[#F5C400] uppercase tracking-widest block leading-none font-black">
                               VIP PLAN
                             </span>
-                            <div className="bg-[#0D1222]/40 p-2.5 rounded-xl space-y-1.5 border border-slate-900/60">
+                            <div className="bg-[#0F1322]/60 p-2.5 rounded-xl space-y-1.5 border border-slate-900/90 shadow-inner">
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-slate-500 text-[6.5px] tracking-wider uppercase font-extrabold">LOCK-TIER</span>
                                 <span className="text-amber-500 font-black block truncate text-[10.5px] uppercase font-bold">
@@ -1161,43 +1161,9 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                               </div>
                             </div>
                           </div>
-
-                          <div className="space-y-0.5 col-span-2 border-t border-slate-900/80 pt-2.5">
-                            <span className="text-[7.5px] text-slate-500 uppercase tracking-widest block leading-none mb-1">
-                              Payment Protocol Details
-                            </span>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-slate-300 font-black block tracking-wide">
-                                Channel: {pay.paymentMethod || 'Other Private Wire'}
-                              </span>
-                              {localMoneyStr && (
-                                <span className="text-emerald-400 font-black block text-[9.5px]">
-                                  Equiv: {localMoneyStr}
-                                </span>
-                              )}
-                              <span className="text-slate-400 block tracking-tight break-all">
-                                Reference/Phone: {pay.txHashOrPhone || 'N/A Verification Hash'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="col-span-2 border-t border-slate-900/80 pt-2.5 grid grid-cols-3 gap-2 text-[8px] text-slate-500 font-black tracking-tight select-none">
-                            <div className="space-y-0.5">
-                              <span>DATE SUBMITTED</span>
-                              <span className="text-slate-400 block font-mono mt-0.5">{fileDate}</span>
-                            </div>
-                            <div className="space-y-0.5">
-                              <span>TIME TIMESTAMP</span>
-                              <span className="text-slate-400 block font-mono mt-0.5">{fileTime}</span>
-                            </div>
-                            <div className="space-y-0.5">
-                              <span>LAST UPDATE</span>
-                              <span className="text-[#F5C400] block font-mono mt-0.5">{updateTime}</span>
-                            </div>
-                          </div>
                         </div>
 
-                        {/* SCREENSHOT PREVIEW SHOWN SECOND AND LARGE OPTIMIZED FOR VERIFICATION */}
+                        {/* 2. SCREENSHOT PREVIEW SHOWN SECOND AND LARGE OPTIMIZED FOR VERIFICATION */}
                         {pay.screenshot && !isImagesHidden ? (
                           <div className="px-1 space-y-1.5 select-none">
                             <div className="relative h-56 rounded-[22px] overflow-hidden bg-slate-950 border border-slate-900 flex items-center justify-center cursor-zoom-in group/img hover:border-slate-800 transition duration-300 shadow-inner">
@@ -1249,6 +1215,43 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                             <span>System Security Defect: Raw deposit snapshot absent from storage profile ledger!</span>
                           </div>
                         ) : null}
+
+                        {/* 3. PAYMENT PROTOCOL DETAILS & TIMESTAMPS (Below screenshot preview) */}
+                        <div className="bg-[#050711] p-3.5 rounded-[22px] border border-slate-900/60 font-mono text-[10px] select-text flex flex-col gap-2.5 leading-tight">
+                          <div className="space-y-0.5">
+                            <span className="text-[7.5px] text-slate-550 uppercase tracking-widest block leading-none mb-1 font-bold">
+                              Payment Protocol Details
+                            </span>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-slate-300 font-black block tracking-wide text-[10.5px]">
+                                Channel: {pay.paymentMethod || 'Other Private Wire'}
+                              </span>
+                              {localMoneyStr && (
+                                <span className="text-emerald-400 font-bold block text-[9.5px]">
+                                  Equiv: {localMoneyStr}
+                                </span>
+                              )}
+                              <span className="text-slate-400 block tracking-tight break-all">
+                                Reference/Phone: {pay.txHashOrPhone || 'N/A Verification Hash'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="border-t border-slate-900/80 pt-2.5 grid grid-cols-3 gap-2 text-[8px] text-slate-500 font-black tracking-tight select-none">
+                            <div className="space-y-0.5">
+                              <span>DATE SUBMITTED</span>
+                              <span className="text-slate-400 block font-mono mt-0.5">{fileDate}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              <span>TIME TIMESTAMP</span>
+                              <span className="text-slate-400 block font-mono mt-0.5">{fileTime}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              <span>LAST UPDATE</span>
+                              <span className="text-[#F5C400] block font-mono mt-0.5">{updateTime}</span>
+                            </div>
+                          </div>
+                        </div>
 
                         {/* Subscription indicators if already approved */}
                         {isApproved && pay.vipStartDate && pay.vipEndDate && (
