@@ -39,6 +39,53 @@ const getFutureEATDateString = (daysOffset: number): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+const getExpirationDateForPlan = (price?: number, duration?: string): { endDate: string; rangeType: string } => {
+  const normDuration = (duration || '').toLowerCase().replace(/\s+/g, '');
+  const p = price || 0;
+
+  // 1 Day preset - ends today (at 23:59 EAT)
+  if (normDuration.includes('1day') || normDuration === 'day' || p === 15) {
+    return { endDate: getTodayInEATString(), rangeType: 'today' };
+  }
+  // 1 Month preset - ends after 30 days starting today
+  if (normDuration.includes('1month') || normDuration === 'month' || normDuration.includes('30day') || p === 420) {
+    return { endDate: getFutureEATDateString(30), rangeType: 'month' };
+  }
+  // 3 Months preset - ends after 90 days starting today
+  if (normDuration.includes('3month') || p === 999) {
+    return { endDate: getFutureEATDateString(90), rangeType: '3months' };
+  }
+  // 5 Months preset - ends after 150 days starting today
+  if (normDuration.includes('5month') || p === 1600) {
+    return { endDate: getFutureEATDateString(150), rangeType: '5months' };
+  }
+  // 6 Months preset - ends after 180 days starting today
+  if (normDuration.includes('6month') || p === 1800) {
+    return { endDate: getFutureEATDateString(180), rangeType: '6months' };
+  }
+  // 12 Months preset - ends after 365 days starting today
+  if (normDuration.includes('12month') || normDuration.includes('year') || normDuration.includes('annual') || p === 2900) {
+    return { endDate: getFutureEATDateString(365), rangeType: '12months' };
+  }
+
+  // Fallback heuristic check based on prices
+  if (p <= 15) {
+    return { endDate: getTodayInEATString(), rangeType: 'today' };
+  } else if (p <= 450) {
+    return { endDate: getFutureEATDateString(30), rangeType: 'month' };
+  } else if (p <= 1050) {
+    return { endDate: getFutureEATDateString(90), rangeType: '3months' };
+  } else if (p <= 1650) {
+    return { endDate: getFutureEATDateString(150), rangeType: '5months' };
+  } else if (p <= 1850) {
+    return { endDate: getFutureEATDateString(180), rangeType: '6months' };
+  } else if (p <= 3000) {
+    return { endDate: getFutureEATDateString(365), rangeType: '12months' };
+  }
+
+  return { endDate: getFutureEATDateString(30), rangeType: 'month' };
+};
+
 const formatDurationForReceipt = (duration: string | undefined): string => {
   if (!duration) return 'N/A';
   const norm = duration.toLowerCase().replace(/\s+/g, '');
@@ -137,12 +184,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [selectedScreenshotUrl, setSelectedScreenshotUrl] = useState<string | null>(null);
   const [showEmailsInReceipts, setShowEmailsInReceipts] = useState(true);
   const [hideEmails, setHideEmails] = useState(false);
+  const [hideImages, setHideImages] = useState(false);
   const [isFullscreenPage, setIsFullscreenPage] = useState(false);
 
   // Approving payment date range modal state
   const [paymentToApprove, setPaymentToApprove] = useState<any | null>(null);
   const [approvalEndDate, setApprovalEndDate] = useState<string>(() => getTodayInEATString());
-  const [approvalRangeType, setApprovalRangeType] = useState<'today' | 'week' | 'custom'>('today');
+  const [approvalRangeType, setApprovalRangeType] = useState<string>('today');
 
   // Recycle Bin states
   const [deletedMatches, setDeletedMatches] = useState<any[]>([]);
@@ -268,8 +316,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   const handleApprovePayment = (payment: any) => {
-    setApprovalRangeType('today');
-    setApprovalEndDate(getTodayInEATString());
+    const { endDate, rangeType } = getExpirationDateForPlan(payment.planPrice, payment.planDuration);
+    setApprovalRangeType(rangeType);
+    setApprovalEndDate(endDate);
     setPaymentToApprove(payment);
   };
 
@@ -488,7 +537,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className={isFullscreenPage ? "overflow-y-auto flex-1 flex flex-col min-h-0 bg-[#060813]" : "p-4 overflow-y-auto scrollbar-none flex-1"}>
+        <div className={isFullscreenPage ? "flex-1 flex flex-col min-h-0 bg-[#060813]" : "p-4 overflow-y-auto scrollbar-none flex-1"}>
           {activeSubTab === 'add' && (
             /* Publish Tip Form */
             <form onSubmit={handleAddSubmit} className="space-y-3.5">
@@ -622,6 +671,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               setHideEmails={setHideEmails}
               isFullscreenPage={isFullscreenPage}
               setIsFullscreenPage={setIsFullscreenPage}
+              hideImages={hideImages}
+              setHideImages={setHideImages}
             />
           )}
 
@@ -1085,7 +1136,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               {usr.username || usr.email?.split('@')[0] || 'User Profile'}
                             </span>
                             <span className="block text-[9px] font-mono text-slate-400 select-all truncate">
-                              {hideEmails ? "••••••••••••••••••••" : usr.email}
+                              {hideEmails ? "xxxxxx" : usr.email}
                             </span>
                           </div>
                           
@@ -1444,13 +1495,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       setApprovalRangeType('today');
                       setApprovalEndDate(getTodayInEATString());
                     }}
-                    className={`py-1.5 px-2 rounded-lg text-[9.5px] font-black uppercase transition border ${
+                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
                       approvalRangeType === 'today'
                         ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
                         : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
                     }`}
                   >
-                    Today Only
+                    1 Day (Today)
                   </button>
                   <button
                     type="button"
@@ -1458,13 +1509,69 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       setApprovalRangeType('week');
                       setApprovalEndDate(getFutureEATDateString(7));
                     }}
-                    className={`py-1.5 px-2 rounded-lg text-[9.5px] font-black uppercase transition border ${
+                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
                       approvalRangeType === 'week'
                         ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
                         : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
                     }`}
                   >
-                    Next 1 Week
+                    1 Week (7d)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setApprovalRangeType('month');
+                      setApprovalEndDate(getFutureEATDateString(30));
+                    }}
+                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
+                      approvalRangeType === 'month'
+                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
+                    }`}
+                  >
+                    1 Month (30d)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setApprovalRangeType('3months');
+                      setApprovalEndDate(getFutureEATDateString(90));
+                    }}
+                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
+                      approvalRangeType === '3months'
+                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
+                    }`}
+                  >
+                    3 Months (90d)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setApprovalRangeType('6months');
+                      setApprovalEndDate(getFutureEATDateString(180));
+                    }}
+                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
+                      approvalRangeType === '6months'
+                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
+                    }`}
+                  >
+                    6 Months (180d)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setApprovalRangeType('12months');
+                      setApprovalEndDate(getFutureEATDateString(365));
+                    }}
+                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
+                      approvalRangeType === '12months'
+                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
+                    }`}
+                  >
+                    1 Year (365d)
                   </button>
                 </div>
               </div>

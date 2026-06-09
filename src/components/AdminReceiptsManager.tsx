@@ -48,6 +48,8 @@ interface AdminReceiptsManagerProps {
   setHideEmails?: (value: boolean) => void;
   isFullscreenPage?: boolean;
   setIsFullscreenPage?: (value: boolean) => void;
+  hideImages?: boolean;
+  setHideImages?: (value: boolean) => void;
 }
 
 // Helper to get today's date in EAT format "DD Month YYYY"
@@ -70,7 +72,9 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   hideEmails,
   setHideEmails,
   isFullscreenPage,
-  setIsFullscreenPage
+  setIsFullscreenPage,
+  hideImages,
+  setHideImages
 }) => {
   // Backups and fallback states
   const [localHideEmails, setLocalHideEmails] = useState(false);
@@ -80,6 +84,16 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
       setHideEmails(!hideEmails);
     } else {
       setLocalHideEmails(!localHideEmails);
+    }
+  };
+
+  const [localHideImages, setLocalHideImages] = useState(false);
+  const isImagesHidden = hideImages !== undefined ? hideImages : localHideImages;
+  const toggleImagesHidden = () => {
+    if (setHideImages) {
+      setHideImages(!hideImages);
+    } else {
+      setLocalHideImages(!localHideImages);
     }
   };
 
@@ -624,7 +638,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
 
       const drawScreenshotIntoCanvas = () => {
         return new Promise<void>((resolve) => {
-          if (!pay.screenshot) {
+          if (!pay.screenshot || isImagesHidden) {
             drawSealPlaceholder(ctx);
             resolve();
             return;
@@ -778,6 +792,22 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
             <span>{isEmailsHidden ? "Emails Hidden" : "Hide Emails"}</span>
           </button>
 
+          {/* Image Hiding Button */}
+          <button
+            type="button"
+            onClick={toggleImagesHidden}
+            className={`px-3.5 py-2 border rounded-xl text-[10px] font-black uppercase tracking-wider transition active:scale-95 cursor-pointer flex items-center gap-2 ${
+              isImagesHidden 
+                ? 'bg-[#EF4444]/20 border-[#EF4444]/50 text-rose-450' 
+                : 'bg-slate-900 border-slate-800 text-slate-350 hover:text-white'
+            }`}
+            title="Toggle hiding user screenshots/images globally on the admin dashboard"
+            id="toggle_images_btn_manager"
+          >
+            {isImagesHidden ? <EyeOff className="w-3.5 h-3.5 text-rose-400" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+            <span>{isImagesHidden ? "Images Hidden" : "Hide Images"}</span>
+          </button>
+
           {/* Full Screen Toggle Button */}
           <button
             type="button"
@@ -807,176 +837,180 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
       </div>
 
       {/* 1. TOP STATISTICS METRICS GLASS PANEL (Stripe / Paypal Business inspired) */}
-      <div className="p-5 grid grid-cols-2 sm:grid-cols-7 gap-3 border-b border-[#141B2E] bg-[#0A0D1B]/40">
-        {[
-          { label: 'Total Submissions', val: stats.total, color: 'text-slate-100', bg: 'bg-[#121B33]/10 border-slate-900/60' },
-          { label: 'Pending Review', val: stats.pending, color: 'text-amber-400 font-extrabold', bg: 'bg-amber-450/4 border-amber-500/10' },
-          { label: 'Approved Access', val: stats.approved, color: 'text-emerald-400 font-extrabold', bg: 'bg-emerald-450/4 border-emerald-500/10' },
-          { label: 'Rejected Proofs', val: stats.rejected, color: 'text-rose-500 font-extrabold', bg: 'bg-rose-450/4 border-rose-500/10' },
-          { label: 'Regenerated Req', val: stats.regenerated, color: 'text-blue-400 font-extrabold', bg: 'bg-blue-450/4 border-blue-500/10' },
-          { label: "Today's Submissions", val: stats.todaysSubmissions, color: 'text-[#F5C400] font-black', bg: 'bg-[#F5C400]/5 border-[#F5C400]/20' },
-          { label: "Total Amount Rec", val: `$${stats.totalAmountReceived.toFixed(2)}`, color: 'text-emerald-400 font-black', bg: 'bg-emerald-500/5 border-emerald-500/20' }
-        ].map((item, index) => (
-          <div key={index} className={`rounded-2xl p-3 border hover:border-slate-805 transition duration-300 ${item.bg}`}>
-            <span className="text-[7.5px] font-mono uppercase tracking-wider text-slate-500 block font-black leading-none">{item.label}</span>
-            <span className={`text-[16px] font-mono mt-1 block leading-none ${item.color}`}>{item.val}</span>
-          </div>
-        ))}
-      </div>
+      {!isFullPage && (
+        <div className="p-5 grid grid-cols-2 sm:grid-cols-7 gap-3 border-b border-[#141B2E] bg-[#0A0D1B]/40">
+          {[
+            { label: 'Total Submissions', val: stats.total, color: 'text-slate-100', bg: 'bg-[#121B33]/10 border-slate-900/60' },
+            { label: 'Pending Review', val: stats.pending, color: 'text-amber-400 font-extrabold', bg: 'bg-amber-450/4 border-amber-500/10' },
+            { label: 'Approved Access', val: stats.approved, color: 'text-emerald-400 font-extrabold', bg: 'bg-emerald-450/4 border-emerald-500/10' },
+            { label: 'Rejected Proofs', val: stats.rejected, color: 'text-rose-500 font-extrabold', bg: 'bg-rose-450/4 border-rose-500/10' },
+            { label: 'Regenerated Req', val: stats.regenerated, color: 'text-blue-400 font-extrabold', bg: 'bg-blue-450/4 border-blue-500/10' },
+            { label: "Today's Submissions", val: stats.todaysSubmissions, color: 'text-[#F5C400] font-black', bg: 'bg-[#F5C400]/5 border-[#F5C400]/20' },
+            { label: "Total Amount Rec", val: `$${stats.totalAmountReceived.toFixed(2)}`, color: 'text-emerald-400 font-black', bg: 'bg-emerald-500/5 border-emerald-500/20' }
+          ].map((item, index) => (
+            <div key={index} className={`rounded-2xl p-3 border hover:border-slate-805 transition duration-300 ${item.bg}`}>
+              <span className="text-[7.5px] font-mono uppercase tracking-wider text-slate-500 block font-black leading-none">{item.label}</span>
+              <span className={`text-[16px] font-mono mt-1 block leading-none ${item.color}`}>{item.val}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 2. ADVANCED SCROLLING FILTER ACTION CONTROL PANEL */}
-      <div className="p-5 border-b border-[#141B2E] space-y-3 bg-[#0A0E1A]/85 flex flex-col shadow-sm">
-        
-        {/* Row 1: Filter Drops and Search bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      {!isFullPage && (
+        <div className="p-5 border-b border-[#141B2E] space-y-3 bg-[#0A0E1A]/85 flex flex-col shadow-sm">
           
-          {/* User Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search user, ID, email, reference..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono outline-none"
-            />
-          </div>
-
-          {/* Status Dropdown */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-mono text-slate-500 uppercase shrink-0 font-black">Status:</span>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="flex-1 px-3 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition"
-            >
-              <option value="all">ALL STATUSES</option>
-              <option value="pending">🟡 PENDING</option>
-              <option value="approved">🟢 APPROVED</option>
-              <option value="rejected">🔴 REJECTED</option>
-              <option value="regenerated">🔵 REGENERATED</option>
-            </select>
-          </div>
-
-          {/* Payment Method Dropdown */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-mono text-slate-500 uppercase shrink-0 font-black">Method:</span>
-            <select
-              value={filterMethod}
-              onChange={(e) => setFilterMethod(e.target.value)}
-              className="flex-1 px-3 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition"
-            >
-              <option value="all">ALL METADATA</option>
-              <option value="usdt">USDT COINS</option>
-              <option value="mpesa">M-PESA MOBILE</option>
-              <option value="western">WESTERN UNION</option>
-              <option value="other">MANUAL BANK</option>
-            </select>
-          </div>
-
-          {/* Date Presets Toggle */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-mono text-slate-500 uppercase shrink-0 font-black">Date Range:</span>
-            <select
-              value={datePreset}
-              onChange={(e) => setDatePreset(e.target.value)}
-              className="flex-1 px-3 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition"
-            >
-              <option value="all">ALL TRANSACTIONS</option>
-              <option value="today">TODAY ONLY (EAT)</option>
-              <option value="7days">LAST 7 DAYS</option>
-              <option value="30days">LAST 30 DAYS</option>
-              <option value="custom">CUSTOM CALENDAR</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Custom Calendar date picker drawer if preset set to custom */}
-        {datePreset === 'custom' && (
-          <div className="px-4 py-3 bg-slate-950/70 border border-slate-900 rounded-xl flex flex-wrap items-center gap-4.5 animate-slide-down">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500 font-mono text-[9px] uppercase font-bold">Start:</span>
-              <input 
-                type="date"
-                value={customStartDate}
-                onChange={(e) => setCustomStartDate(e.target.value)}
-                className="bg-[#0b0f1a] border border-slate-850 text-slate-200 text-[10.5px] font-mono px-2.5 py-1 rounded-lg"
+          {/* Row 1: Filter Drops and Search bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            
+            {/* User Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search user, ID, email, reference..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono outline-none"
               />
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500 font-mono text-[9px] uppercase font-bold">End:</span>
-              <input 
-                type="date"
-                value={customEndDate}
-                onChange={(e) => setCustomEndDate(e.target.value)}
-                className="bg-[#0b0f1a] border border-slate-850 text-slate-200 text-[10.5px] font-mono px-2.5 py-1 rounded-lg"
-              />
+
+            {/* Status Dropdown */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono text-slate-555 uppercase shrink-0 font-black">Status:</span>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="flex-1 px-3 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition"
+              >
+                <option value="all">ALL STATUSES</option>
+                <option value="pending">🟡 PENDING</option>
+                <option value="approved">🟢 APPROVED</option>
+                <option value="rejected">🔴 REJECTED</option>
+                <option value="regenerated">🔵 REGENERATED</option>
+              </select>
             </div>
-            <button
-              onClick={() => {
-                setCustomStartDate('');
-                setCustomEndDate('');
-              }}
-              className="text-[#F5C400] text-[9.5px] font-mono uppercase bg-[#F5C400]/5 px-2.5 py-1 rounded border border-[#F5C400]/15 tracking-wider hover:bg-[#F5C400]/10 cursor-pointer text-center ml-auto"
-            >
-              RESET CUSTOM BOUNDS
-            </button>
-          </div>
-        )}
 
-        {/* Bulk Selection toggle triggers */}
-        <div className="pt-2 flex items-center justify-between gap-3 text-[11px] font-sans">
-          <div className="flex items-center gap-2 text-slate-400 select-none">
-            <button
-              onClick={handleToggleSelectAll}
-              className="px-3.5 py-1.5 bg-slate-950 border border-slate-850 hover:bg-slate-900 text-[10px] font-mono uppercase tracking-wider font-bold rounded-lg transition"
-            >
-              {selectedReceiptIds.length === filteredReceipts.length ? 'Deselect All' : 'Select All matching'}
-            </button>
-            <span className="text-[10px] font-mono text-slate-555">
-              Showing {filteredReceipts.length} of {paymentsList.length} receipts
-            </span>
-          </div>
-        </div>
+            {/* Payment Method Dropdown */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono text-slate-555 uppercase shrink-0 font-black">Method:</span>
+              <select
+                value={filterMethod}
+                onChange={(e) => setFilterMethod(e.target.value)}
+                className="flex-1 px-3 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition"
+              >
+                <option value="all">ALL METADATA</option>
+                <option value="usdt">USDT COINS</option>
+                <option value="mpesa">M-PESA MOBILE</option>
+                <option value="western">WESTERN UNION</option>
+                <option value="other">MANUAL BANK</option>
+              </select>
+            </div>
 
-        {/* Bulk Actions Bar if selection made */}
-        {selectedReceiptIds.length > 0 && (
-          <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-slate-950 to-amber-500/5 border border-amber-500/25 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3 animate-pulse select-none">
-            <div className="flex items-center gap-2">
-              <CheckSquare className="w-4 h-4 text-[#F5C400]" />
-              <span className="text-[10.5px] font-sans font-black text-slate-100">
-                Bulk Operations Queue: <span className="text-[#F5C400] underline font-mono font-bold bg-[#F5C400]/5 px-2.5 py-0.5 rounded border border-[#F5C400]/10 text-[9.5px] ml-1">{selectedReceiptIds.length} receipts</span>
+            {/* Date Presets Toggle */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono text-slate-555 uppercase shrink-0 font-black">Date Range:</span>
+              <select
+                value={datePreset}
+                onChange={(e) => setDatePreset(e.target.value)}
+                className="flex-1 px-3 py-2 bg-slate-950 border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition"
+              >
+                <option value="all">ALL TRANSACTIONS</option>
+                <option value="today">TODAY ONLY (EAT)</option>
+                <option value="7days">LAST 7 DAYS</option>
+                <option value="30days">LAST 30 DAYS</option>
+                <option value="custom">CUSTOM CALENDAR</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Custom Calendar date picker drawer if preset set to custom */}
+          {datePreset === 'custom' && (
+            <div className="px-4 py-3 bg-slate-950/70 border border-slate-900 rounded-xl flex flex-wrap items-center gap-4.5 animate-slide-down">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500 font-mono text-[9px] uppercase font-bold">Start:</span>
+                <input 
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="bg-[#0b0f1a] border border-slate-850 text-slate-200 text-[10.5px] font-mono px-2.5 py-1 rounded-lg"
+                />
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500 font-mono text-[9px] uppercase font-bold">End:</span>
+                <input 
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className="bg-[#0b0f1a] border border-slate-850 text-slate-200 text-[10.5px] font-mono px-2.5 py-1 rounded-lg"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  setCustomStartDate('');
+                  setCustomEndDate('');
+                }}
+                className="text-[#F5C400] text-[9.5px] font-mono uppercase bg-[#F5C400]/5 px-2.5 py-1 rounded border border-[#F5C400]/15 tracking-wider hover:bg-[#F5C400]/10 cursor-pointer text-center ml-auto"
+              >
+                RESET CUSTOM BOUNDS
+              </button>
+            </div>
+          )}
+
+          {/* Bulk Selection toggle triggers */}
+          <div className="pt-2 flex items-center justify-between gap-3 text-[11px] font-sans">
+            <div className="flex items-center gap-2 text-slate-400 select-none">
+              <button
+                onClick={handleToggleSelectAll}
+                className="px-3.5 py-1.5 bg-slate-950 border border-slate-850 hover:bg-slate-900 text-[10px] font-mono uppercase tracking-wider font-bold rounded-lg transition"
+              >
+                {selectedReceiptIds.length === filteredReceipts.length ? 'Deselect All' : 'Select All matching'}
+              </button>
+              <span className="text-[10px] font-mono text-slate-555">
+                Showing {filteredReceipts.length} of {paymentsList.length} receipts
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 md:justify-end">
-              <button
-                onClick={handleBulkApprove}
-                className="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-555 text-white font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition"
-              >
-                Bulk Approve
-              </button>
-              <button
-                onClick={handleBulkReject}
-                className="px-3.5 py-2 bg-gradient-to-r from-red-650 to-rose-600 text-white font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition"
-              >
-                Bulk Reject
-              </button>
-              <button
-                onClick={handleBulkRegenerate}
-                className="px-3.5 py-2 bg-gradient-to-r from-blue-650 to-indigo-650 text-white font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition"
-              >
-                Bulk Request Proof
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                className="px-3.5 py-2 bg-[#1C0F10] border border-red-500/30 text-rose-455 font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition hover:bg-rose-500/10 shadow"
-              >
-                Bulk Delete
-              </button>
-            </div>
           </div>
-        )}
-      </div>
+
+          {/* Bulk Actions Bar if selection made */}
+          {selectedReceiptIds.length > 0 && (
+            <div className="p-3.5 bg-gradient-to-r from-amber-500/10 via-slate-950 to-amber-500/5 border border-amber-500/25 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3 animate-pulse select-none">
+              <div className="flex items-center gap-2">
+                <CheckSquare className="w-4 h-4 text-[#F5C400]" />
+                <span className="text-[10.5px] font-sans font-black text-slate-100">
+                  Bulk Operations Queue: <span className="text-[#F5C400] underline font-mono font-bold bg-[#F5C400]/5 px-2.5 py-0.5 rounded border border-[#F5C400]/10 text-[9.5px] ml-1">{selectedReceiptIds.length} receipts</span>
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                <button
+                  onClick={handleBulkApprove}
+                  className="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-555 text-white font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition"
+                >
+                  Bulk Approve
+                </button>
+                <button
+                  onClick={handleBulkReject}
+                  className="px-3.5 py-2 bg-gradient-to-r from-red-650 to-rose-600 text-white font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition"
+                >
+                  Bulk Reject
+                </button>
+                <button
+                  onClick={handleBulkRegenerate}
+                  className="px-3.5 py-2 bg-gradient-to-r from-blue-650 to-indigo-650 text-white font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition"
+                >
+                  Bulk Request Proof
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="px-3.5 py-2 bg-[#1C0F10] border border-red-500/30 text-rose-455 font-black text-[9.5px] uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition hover:bg-rose-500/10 shadow"
+                >
+                  Bulk Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 3. SCROLLING MAIN TIMELINE RECEIPTS LIST */}
       <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-none">
@@ -1070,7 +1104,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                                 {pay.username || 'VIP Client'}
                               </h4>
                               <span className="text-[9.5px] font-mono text-slate-400 select-all block leading-none">
-                                {isEmailsHidden ? "••••••••••••••••••••" : pay.userEmail}
+                                {isEmailsHidden ? "xxxxxx" : pay.userEmail}
                               </span>
                             </div>
                           </div>
@@ -1087,12 +1121,84 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                               {isRegenerated && 'New Proof Req'}
                               {isPending && 'Awaiting Audit'}
                             </span>
-                            <span className="block text-[8px] font-mono text-slate-500 uppercase font-black tracking-widest">{fileTime}</span>
+                            <span className="block text-[8px] font-mono text-slate-550 uppercase font-black tracking-widest">{fileTime}</span>
                           </div>
                         </div>
 
-                        {/* SCREENSHOT PREVIEW SHOWN FIRST AND LARGE OPTIMIZED FOR VERIFICATION */}
-                        {pay.screenshot ? (
+                        {/* COMPREHENSIVE FINANCIAL INFORMATION GRID PANEL (Moved to top of screenshot) */}
+                        <div className="bg-[#050711] p-3.5 rounded-[22px] border border-slate-900/60 font-mono text-[10px] select-text grid grid-cols-2 gap-3.5 leading-tight">
+                          
+                          <div className="space-y-1">
+                            <span className="text-[7.5px] text-[#F5C400] uppercase tracking-widest block leading-none font-bold">
+                              CLIENT AUTH
+                            </span>
+                            <div className="bg-[#0D1222]/40 p-2.5 rounded-xl space-y-1.5 border border-slate-900/60">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-slate-500 text-[6.5px] tracking-wider uppercase font-extrabold">PROFILE</span>
+                                <span className="text-white font-black block truncate text-[10.5px] uppercase">
+                                  {pay.username || 'JZON'}
+                                </span>
+                              </div>
+                              <div className="border-t border-slate-900/40 pt-1 text-slate-500 text-[8px] truncate">
+                                UID: {pay.userId || 'w4Qvob...'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <span className="text-[7.5px] text-[#F5C400] uppercase tracking-widest block leading-none font-bold">
+                              VIP PLAN
+                            </span>
+                            <div className="bg-[#0D1222]/40 p-2.5 rounded-xl space-y-1.5 border border-slate-900/60">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-slate-500 text-[6.5px] tracking-wider uppercase font-extrabold">LOCK-TIER</span>
+                                <span className="text-amber-500 font-black block truncate text-[10.5px] uppercase font-bold">
+                                  {pay.planDuration || '1 DAY'}
+                                </span>
+                              </div>
+                              <div className="border-t border-slate-900/40 pt-1 text-emerald-400 font-extrabold text-[8px]">
+                                Rate: ${pay.planPrice?.toFixed(2) || '15.00'} USD
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5 col-span-2 border-t border-slate-900/80 pt-2.5">
+                            <span className="text-[7.5px] text-slate-500 uppercase tracking-widest block leading-none mb-1">
+                              Payment Protocol Details
+                            </span>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-slate-300 font-black block tracking-wide">
+                                Channel: {pay.paymentMethod || 'Other Private Wire'}
+                              </span>
+                              {localMoneyStr && (
+                                <span className="text-emerald-400 font-black block text-[9.5px]">
+                                  Equiv: {localMoneyStr}
+                                </span>
+                              )}
+                              <span className="text-slate-400 block tracking-tight break-all">
+                                Reference/Phone: {pay.txHashOrPhone || 'N/A Verification Hash'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="col-span-2 border-t border-slate-900/80 pt-2.5 grid grid-cols-3 gap-2 text-[8px] text-slate-500 font-black tracking-tight select-none">
+                            <div className="space-y-0.5">
+                              <span>DATE SUBMITTED</span>
+                              <span className="text-slate-400 block font-mono mt-0.5">{fileDate}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              <span>TIME TIMESTAMP</span>
+                              <span className="text-slate-400 block font-mono mt-0.5">{fileTime}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              <span>LAST UPDATE</span>
+                              <span className="text-[#F5C400] block font-mono mt-0.5">{updateTime}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* SCREENSHOT PREVIEW SHOWN SECOND AND LARGE OPTIMIZED FOR VERIFICATION */}
+                        {pay.screenshot && !isImagesHidden ? (
                           <div className="px-1 space-y-1.5 select-none">
                             <div className="relative h-56 rounded-[22px] overflow-hidden bg-slate-950 border border-slate-900 flex items-center justify-center cursor-zoom-in group/img hover:border-slate-800 transition duration-300 shadow-inner">
                               <img
@@ -1137,74 +1243,12 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                               Verification Screenshot Proof (Immediate render viewport)
                             </span>
                           </div>
-                        ) : (
+                        ) : !pay.screenshot && !isImagesHidden ? (
                           <div className="p-4 rounded-2xl border border-rose-550/25 bg-rose-500/5 text-rose-455 flex items-center gap-3 text-[10px] select-none font-bold">
                             <ShieldAlert className="w-4 h-4 text-rose-500 fill-none" />
                             <span>System Security Defect: Raw deposit snapshot absent from storage profile ledger!</span>
                           </div>
-                        )}
-
-                        {/* COMPREHENSIVE FINANCIAL INFORMATION GRID PANEL */}
-                        <div className="bg-[#050711] p-3.5 rounded-[22px] border border-slate-900/60 font-mono text-[10px] select-text grid grid-cols-2 gap-3.5 leading-tight">
-                          
-                          <div className="space-y-0.5">
-                            <span className="text-[7.5px] text-slate-500 uppercase tracking-widest block leading-none">
-                              Client Auth Profile
-                            </span>
-                            <span className="text-white font-extrabold block truncate uppercase">
-                              {pay.username || 'System User'} 
-                            </span>
-                            <span className="text-slate-500 text-[8.5px] block truncate text-[9.5px]">
-                              UID: {pay.userId}
-                            </span>
-                          </div>
-
-                          <div className="space-y-0.5">
-                            <span className="text-[7.5px] text-slate-500 uppercase tracking-widest block leading-none">
-                              VIP Plan Lock-Tier
-                            </span>
-                            <span className="text-amber-500 font-extrabold block uppercase">
-                              {pay.planDuration || 'Manual Activation'}
-                            </span>
-                            <span className="text-slate-500 block text-[9.5px]">
-                              Rate: ${pay.planPrice?.toFixed(2)} USD
-                            </span>
-                          </div>
-
-                          <div className="space-y-0.5 col-span-2 border-t border-slate-900/80 pt-2.5">
-                            <span className="text-[7.5px] text-slate-500 uppercase tracking-widest block leading-none mb-1">
-                              Payment Protocol Details
-                            </span>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-slate-300 font-black block tracking-wide">
-                                Channel: {pay.paymentMethod || 'Other Private Wire'}
-                              </span>
-                              {localMoneyStr && (
-                                <span className="text-emerald-400 font-black block text-[9.5px]">
-                                  Equiv: {localMoneyStr}
-                                </span>
-                              )}
-                              <span className="text-slate-400 block tracking-tight break-all">
-                                Reference/Phone: {pay.txHashOrPhone || 'N/A Verification Hash'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="col-span-2 border-t border-slate-900/80 pt-2.5 grid grid-cols-3 gap-2 text-[8px] text-slate-500 font-black tracking-tight select-none">
-                            <div className="space-y-0.5">
-                              <span>DATE SUBMITTED</span>
-                              <span className="text-slate-400 block font-mono mt-0.5">{fileDate}</span>
-                            </div>
-                            <div className="space-y-0.5">
-                              <span>TIME TIMESTAMP</span>
-                              <span className="text-slate-400 block font-mono mt-0.5">{fileTime}</span>
-                            </div>
-                            <div className="space-y-0.5">
-                              <span>LAST UPDATE</span>
-                              <span className="text-[#F5C400] block font-mono mt-0.5">{updateTime}</span>
-                            </div>
-                          </div>
-                        </div>
+                        ) : null}
 
                         {/* Subscription indicators if already approved */}
                         {isApproved && pay.vipStartDate && pay.vipEndDate && (
