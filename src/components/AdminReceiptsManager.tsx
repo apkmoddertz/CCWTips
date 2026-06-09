@@ -64,6 +64,29 @@ const getEATTodayString = (): string => {
   return formatter.format(d);
 };
 
+const getEATDateObj = (): Date => {
+  const d = new Date();
+  const utc = d.getTime() + d.getTimezoneOffset() * 60000;
+  return new Date(utc + (3 * 3600000));
+};
+
+const getEATSendingTodayDateString = (): string => {
+  const eatDate = getEATDateObj();
+  const yyyy = eatDate.getFullYear();
+  const mm = String(eatDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(eatDate.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const getEATSendingFutureDateString = (daysOffset: number): string => {
+  const eatDate = getEATDateObj();
+  eatDate.setDate(eatDate.getDate() + daysOffset);
+  const yyyy = eatDate.getFullYear();
+  const mm = String(eatDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(eatDate.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   paymentsList,
   paymentsLoading,
@@ -126,7 +149,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   
   // Expiry date picker modal state upon manual individual approval
   const [approvalTarget, setApprovalTarget] = useState<any | null>(null);
-  const [customApprovalWeeks, setCustomApprovalWeeks] = useState<number>(4); // default 4 weeks
+  const [customApprovalDays, setCustomApprovalDays] = useState<number>(28); // default 28 days
   const [isApprovingInProgress, setIsApprovingInProgress] = useState<boolean>(false);
 
   // Computed total statistics
@@ -289,21 +312,15 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   // INDIVIDUAL ACTIONS
   const handlePrepareApprove = (payment: any) => {
     setApprovalTarget(payment);
-    setCustomApprovalWeeks(4); // Default to roughly 1 month (28 days)
+    setCustomApprovalDays(28); // Default to roughly 1 month (28 days)
   };
 
   const handleConfirmApproval = async () => {
     if (!approvalTarget) return;
     setIsApprovingInProgress(true);
     try {
-      const daysOffset = customApprovalWeeks * 7;
-      const d = new Date();
-      d.setDate(d.getDate() + daysOffset);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const calculatedEndDate = `${year}-${month}-${day}`;
-      const today = new Date().toISOString().split('T')[0];
+      const today = getEATSendingTodayDateString();
+      const calculatedEndDate = getEATSendingFutureDateString(customApprovalDays);
 
       // Update user role & vip timestamp
       const userRef = doc(db, 'users', approvalTarget.userId);
@@ -1404,22 +1421,27 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
               <div className="space-y-1.5">
                 <label className="text-[8.5px] font-mono text-slate-400 uppercase font-black tracking-wider block">Duration Preset Length:</label>
                 <select
-                  value={customApprovalWeeks}
-                  onChange={(e) => setCustomApprovalWeeks(parseInt(e.target.value))}
+                  value={customApprovalDays}
+                  onChange={(e) => setCustomApprovalDays(parseInt(e.target.value))}
                   className="w-full px-3 py-2 bg-[#090C17] border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition outline-none"
                 >
-                  <option value={1}>1 WEEK PASS (7 Days)</option>
-                  <option value={2}>2 WEEKS PASS (14 Days)</option>
-                  <option value={4}>4 WEEKS / 1 MONTH (28 Days)</option>
-                  <option value={8}>8 WEEKS / 2 MONTHS (56 Days)</option>
-                  <option value={12}>12 WEEKS / 3 MONTHS (84 Days)</option>
-                  <option value={24}>24 WEEKS / 6 MONTHS (168 Days)</option>
-                  <option value={52}>52 WEEKS / 1 YEAR (364 Days)</option>
+                  <option value={0}>1 DAY PASS (1 DAY)</option>
+                  <option value={7}>1 WEEK PASS (7 DAYS)</option>
+                  <option value={14}>2 WEEKS PASS (14 DAYS)</option>
+                  <option value={28}>4 WEEKS / 1 MONTH (28 DAYS)</option>
+                  <option value={56}>8 WEEKS / 2 MONTHS (56 DAYS)</option>
+                  <option value={84}>12 WEEKS / 3 MONTHS (84 DAYS)</option>
+                  <option value={168}>24 WEEKS / 6 MONTHS (168 DAYS)</option>
+                  <option value={364}>52 WEEKS / 1 YEAR (364 DAYS)</option>
                 </select>
               </div>
 
-              <div className="text-center text-[9px] font-mono text-amber-500 bg-[#F5C400]/5 py-1.5 rounded-lg border border-[#F5C400]/10 leading-relaxed font-bold">
-                🔒 Access starts EAT Today & automatically expires on computed end date.
+              <div className="text-center text-[9px] font-mono text-amber-500 bg-[#F5C400]/5 py-2 px-2.5 rounded-lg border border-[#F5C400]/10 leading-relaxed font-bold">
+                {customApprovalDays === 0 ? (
+                  <span className="text-amber-400">⚠️ Expires at 23:59pm today EAT even if approved at 23:50!</span>
+                ) : (
+                  <span>🔒 Access starts EAT Today & automatically expires on {getEATSendingFutureDateString(customApprovalDays)}</span>
+                )}
               </div>
             </div>
 
