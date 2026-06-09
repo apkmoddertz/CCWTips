@@ -8,6 +8,9 @@ import {
   XCircle, 
   RefreshCw, 
   Eye, 
+  EyeOff,
+  Minimize2,
+  Maximize2,
   Calendar, 
   DollarSign, 
   Award, 
@@ -41,6 +44,10 @@ interface AdminReceiptsManagerProps {
   paymentsLoading: boolean;
   onRefreshList: () => Promise<void>;
   onShowNotification?: (msg: string, type: 'success' | 'info') => void;
+  hideEmails?: boolean;
+  setHideEmails?: (value: boolean) => void;
+  isFullscreenPage?: boolean;
+  setIsFullscreenPage?: (value: boolean) => void;
 }
 
 // Helper to get today's date in EAT format "DD Month YYYY"
@@ -59,8 +66,33 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   paymentsList,
   paymentsLoading,
   onRefreshList,
-  onShowNotification
+  onShowNotification,
+  hideEmails,
+  setHideEmails,
+  isFullscreenPage,
+  setIsFullscreenPage
 }) => {
+  // Backups and fallback states
+  const [localHideEmails, setLocalHideEmails] = useState(false);
+  const isEmailsHidden = hideEmails !== undefined ? hideEmails : localHideEmails;
+  const toggleEmailsHidden = () => {
+    if (setHideEmails) {
+      setHideEmails(!hideEmails);
+    } else {
+      setLocalHideEmails(!localHideEmails);
+    }
+  };
+
+  const [localFullscreen, setLocalFullscreen] = useState(false);
+  const isFullPage = isFullscreenPage !== undefined ? isFullscreenPage : localFullscreen;
+  const toggleFullPage = () => {
+    if (setIsFullscreenPage) {
+      setIsFullscreenPage(!isFullscreenPage);
+    } else {
+      setLocalFullscreen(!localFullscreen);
+    }
+  };
+
   // Filters State
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -76,6 +108,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   const [zoomedScreenshot, setZoomedScreenshot] = useState<{ url: string; id: string } | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [bulkDeleteActive, setBulkDeleteActive] = useState<boolean>(false);
+  const [downloadingProofId, setDownloadingProofId] = useState<string | null>(null);
   
   // Expiry date picker modal state upon manual individual approval
   const [approvalTarget, setApprovalTarget] = useState<any | null>(null);
@@ -461,6 +494,259 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
     }
   };
 
+  const handleDownloadTelegramProof = async (pay: any) => {
+    setDownloadingProofId(pay.id);
+    onShowNotification?.("Generating high-fidelity Telegram channel proof graphic...", "success");
+
+    try {
+      // Create Canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 1000;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error("Could not construct 2D Canvas space");
+
+      // 1. Sleek Gradient Dark Glass Background
+      const radialGrad = ctx.createRadialGradient(400, 350, 40, 400, 500, 650);
+      radialGrad.addColorStop(0, '#0F172A'); // deep slate gray-blue
+      radialGrad.addColorStop(1, '#020617'); // obsidian black
+      ctx.fillStyle = radialGrad;
+      ctx.fillRect(0, 0, 800, 1000);
+
+      // 2. Glowing Golden Frame & Tech Ornamentation
+      ctx.strokeStyle = '#F5C400';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(24, 24, 752, 952);
+
+      ctx.strokeStyle = 'rgba(245, 196, 0, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(32, 32, 736, 936);
+
+      // Decorative Brackets Corner style
+      const drawCornerBracket = (x: number, y: number, lengthX: number, lengthY: number) => {
+        ctx.strokeStyle = '#F5C400';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(x, y + lengthY);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + lengthX, y);
+        ctx.stroke();
+      };
+      drawCornerBracket(24, 24, 45, 45); // top-left
+      drawCornerBracket(776, 24, -45, 45); // top-right
+      drawCornerBracket(24, 976, 45, -45); // bottom-left
+      drawCornerBracket(776, 976, -45, -45); // bottom-right
+
+      // 3. Header Plate
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.beginPath();
+      ctx.roundRect(45, 50, 710, 100, 16);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(245, 196, 0, 0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Header Text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.fillStyle = '#F5C400';
+      ctx.fillText('🏆 VERIFIED VIP RECIPIENT 🏆', 400, 95);
+
+      ctx.font = 'bold 12px monospace';
+      ctx.fillStyle = '#94A3B8';
+      ctx.fillText('SECURE TRANSACTION AUDIT LEDGER • TELEGRAM CHANNEL ACCESS', 400, 128);
+
+      // 4. Centered User Profile Initials Seal
+      ctx.fillStyle = '#1E293B';
+      ctx.beginPath();
+      ctx.arc(400, 222, 45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#F5C400';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // Initials Text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 34px sans-serif';
+      const initials = pay.username ? pay.username.substring(0, 2).toUpperCase() : 'VIP';
+      ctx.fillText(initials, 400, 234);
+
+      // 5. Approved Username & Amount Information Row
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText('CLIENT TELEGRAM USERNAME', 400, 310);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(`@${pay.username || 'VIP CLIENT'}`, 400, 342);
+
+      // Big Amount Display Box (High contrast, clearly showing Amount)
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.12)';
+      ctx.beginPath();
+      ctx.roundRect(200, 375, 400, 75, 18);
+      ctx.fill();
+      ctx.strokeStyle = '#10B981';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#10B981';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText('TOTAL VERIFIED AMOUNT PAID', 400, 398);
+
+      const isTz = pay.paymentMethod?.toLowerCase().includes('tanzania');
+      const isKe = pay.paymentMethod?.toLowerCase().includes('kenya');
+      let amountRepresentation = `$${(pay.planPrice || 0).toFixed(2)} USD`;
+      if (isTz && pay.planPrice) {
+        amountRepresentation += ` (${(Math.round(pay.planPrice * 2600)).toLocaleString()} TZS)`;
+      } else if (isKe && pay.planPrice) {
+        amountRepresentation += ` (${(Math.round(pay.planPrice * 135)).toLocaleString()} KES)`;
+      }
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(amountRepresentation, 400, 432);
+
+      // 6. Screenshot Frame Box (Occupying the center-lower block)
+      const rectX = 180;
+      const rectY = 480;
+      const rectW = 440;
+      const rectH = 410;
+
+      // Draw background outer frame for screenshot container
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.roundRect(rectX - 15, rectY - 15, rectW + 30, rectH + 30, 20);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      const drawScreenshotIntoCanvas = () => {
+        return new Promise<void>((resolve) => {
+          if (!pay.screenshot) {
+            drawSealPlaceholder(ctx);
+            resolve();
+            return;
+          }
+
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            try {
+              ctx.save();
+              ctx.beginPath();
+              ctx.roundRect(rectX, rectY, rectW, rectH, 12);
+              ctx.clip();
+
+              // Fit image maintaining aspect ratio
+              const imgRatio = img.width / img.height;
+              const rectRatio = rectW / rectH;
+              let dW = rectW;
+              let dH = rectH;
+              let dX = rectX;
+              let dY = rectY;
+
+              if (imgRatio > rectRatio) {
+                dH = rectW / imgRatio;
+                dY = rectY + (rectH - dH) / 2;
+              } else {
+                dW = rectH * imgRatio;
+                dX = rectX + (rectW - dW) / 2;
+              }
+
+              ctx.drawImage(img, dX, dY, dW, dH);
+              ctx.restore();
+
+              // Inner golden border
+              ctx.strokeStyle = 'rgba(245, 196, 0, 0.4)';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.roundRect(rectX, rectY, rectW, rectH, 12);
+              ctx.stroke();
+
+              // Info Label
+              ctx.fillStyle = '#64748B';
+              ctx.font = '10px monospace';
+              ctx.fillText('📷 AUDITED TRANSACTION SNAPSHOT PROOF ATTACHED', 400, 932);
+
+              resolve();
+            } catch (err) {
+              console.warn("Could not draw screenshot inside canvas (CORS restriction), falling back to seal placeholder:", err);
+              drawSealPlaceholder(ctx);
+              resolve();
+            }
+          };
+
+          img.onerror = () => {
+            drawSealPlaceholder(ctx);
+            resolve();
+          };
+
+          img.src = pay.screenshot;
+        });
+      };
+
+      const drawSealPlaceholder = (c: CanvasRenderingContext2D) => {
+        // Draw a beautiful fallback emblem
+        c.fillStyle = 'rgba(245, 196, 0, 0.04)';
+        c.beginPath();
+        c.roundRect(rectX, rectY, rectW, rectH, 16);
+        c.fill();
+        c.strokeStyle = 'rgba(245, 196, 0, 0.15)';
+        c.stroke();
+
+        c.fillStyle = '#F5C400';
+        c.font = 'bold 15px sans-serif';
+        c.fillText('🔒 TRUSTED FINANCIAL AUDIT RECONCILED 🔒', 400, 650);
+
+        c.fillStyle = '#94A3B8';
+        c.font = '12px monospace';
+        c.fillText('Invoice submitted successfully and matched on our server.', 400, 690);
+        c.fillText('MEMBERSHIP VALIDATED & SECURE ACCESS GRANTED.', 400, 715);
+      };
+
+      await drawScreenshotIntoCanvas();
+
+      // Watermark Footer info
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('Generated Securely by Fintech Admin Console • Private Verification Proof', 400, 970);
+
+      // Execute Download
+      let finalDataUrl;
+      try {
+        finalDataUrl = canvas.toDataURL('image/png');
+      } catch (err) {
+        console.warn("Security CORS exception while export, recreating canvas without tainted context...", err);
+        // Clean lower block safely
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(rectX, rectY, rectW, rectH);
+        drawSealPlaceholder(ctx);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.font = '11px sans-serif';
+        ctx.fillText('Generated Securely by Fintech Admin Console • Private Verification Proof', 400, 970);
+
+        finalDataUrl = canvas.toDataURL('image/png');
+      }
+
+      const link = document.createElement('a');
+      link.href = finalDataUrl;
+      link.download = `VIP_Approved_Proof_${pay.username || 'Member'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      onShowNotification?.(`Success! Telegram channel proof for @${pay.username} downloaded.`, 'success');
+    } catch (e: any) {
+      console.error(e);
+      onShowNotification?.("Error compiling Telegram proof image.", 'info');
+    } finally {
+      setDownloadingProofId(null);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#060813] text-slate-100 select-none pb-8">
       
@@ -475,14 +761,47 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
             Administrative gateway to verify user-submitted snapshot transaction audits (Dar es Salaam timezone)
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Email Masking Button */}
+          <button
+            type="button"
+            onClick={toggleEmailsHidden}
+            className={`px-3.5 py-2 border rounded-xl text-[10px] font-black uppercase tracking-wider transition active:scale-95 cursor-pointer flex items-center gap-2 ${
+              isEmailsHidden 
+                ? 'bg-amber-400/20 border-amber-400/50 text-[#F5C400]' 
+                : 'bg-slate-900 border-slate-800 text-slate-350 hover:text-white'
+            }`}
+            title="Toggle hiding user emails globally on the admin dashboard"
+            id="toggle_emails_btn_manager"
+          >
+            {isEmailsHidden ? <EyeOff className="w-3.5 h-3.5 text-amber-400" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+            <span>{isEmailsHidden ? "Emails Hidden" : "Hide Emails"}</span>
+          </button>
+
+          {/* Full Screen Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleFullPage}
+            className={`px-3.5 py-2 border rounded-xl text-[10px] font-black uppercase tracking-wider transition active:scale-95 cursor-pointer flex items-center gap-2 ${
+              isFullPage 
+                ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' 
+                : 'bg-slate-900 border-slate-800 text-slate-350 hover:text-white'
+            }`}
+            title="Toggle full screen dedicated page view"
+            id="toggle_fullscreen_btn_manager"
+          >
+            {isFullPage ? <Minimize2 className="w-3.5 h-3.5 text-blue-400" /> : <Maximize2 className="w-3.5 h-3.5 text-slate-400" />}
+            <span>{isFullPage ? "Minimize Mode" : "Fullscreen Page"}</span>
+          </button>
+
           <button 
+            type="button"
             onClick={onRefreshList}
             className="px-4 py-2 bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-800 hover:border-[#F5C400]/40 text-slate-200 text-[10px] font-black uppercase tracking-wider rounded-xl hover:text-[#F5C400] transition cursor-pointer flex items-center gap-2 shadow"
             title="Force synchronization with Firestore ledger records"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Sync Ledger Ledger</span>
+            <RefreshCw className="w-3.5 h-3.5 text-slate-450" />
+            <span>Sync Ledger</span>
           </button>
         </div>
       </div>
@@ -505,8 +824,8 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
         ))}
       </div>
 
-      {/* 2. ADVANCED STICKY FILTER ACTION CONTROL PANEL */}
-      <div className="p-5 border-b border-[#141B2E] space-y-3 bg-[#0A0E1A]/85 flex flex-col sticky top-0 z-30 shadow-md">
+      {/* 2. ADVANCED SCROLLING FILTER ACTION CONTROL PANEL */}
+      <div className="p-5 border-b border-[#141B2E] space-y-3 bg-[#0A0E1A]/85 flex flex-col shadow-sm">
         
         {/* Row 1: Filter Drops and Search bar */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -751,7 +1070,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                                 {pay.username || 'VIP Client'}
                               </h4>
                               <span className="text-[9.5px] font-mono text-slate-400 select-all block leading-none">
-                                {pay.userEmail}
+                                {isEmailsHidden ? "••••••••••••••••••••" : pay.userEmail}
                               </span>
                             </div>
                           </div>
@@ -798,6 +1117,19 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                                 >
                                   <ArrowDownToLine className="w-3.5 h-3.5" />
                                   <span>Download Screenshot</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadTelegramProof(pay)}
+                                  disabled={downloadingProofId === pay.id}
+                                  className="px-3 py-1.5 bg-[#F5C400] text-slate-950 rounded-lg hover:bg-yellow-400 transition flex items-center gap-1 cursor-pointer text-[9px] uppercase tracking-wider font-mono font-black"
+                                >
+                                  {downloadingProofId === pay.id ? (
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>Telegram Proof PNG</span>
                                 </button>
                               </div>
                             </div>
@@ -903,13 +1235,29 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                                 </button>
                               </>
                             ) : (
-                              <button
-                                onClick={() => handleRegenerateReceipt(pay.id, pay.username)}
-                                className="px-3 py-2 bg-slate-900 hover:bg-blue-500/10 border border-slate-900 hover:border-blue-500/20 text-slate-350 rounded-xl cursor-pointer active:scale-95 transition flex items-center gap-1"
-                              >
-                                <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin duration-5000" />
-                                <span>Status to Regenerate</span>
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleRegenerateReceipt(pay.id, pay.username)}
+                                  className="px-3 py-2 bg-slate-900 hover:bg-blue-500/10 border border-slate-900 hover:border-blue-500/20 text-slate-350 rounded-xl cursor-pointer active:scale-95 transition flex items-center gap-1"
+                                >
+                                  <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin duration-5000" />
+                                  <span>Status to Regenerate</span>
+                                </button>
+                                {isApproved && (
+                                  <button
+                                    onClick={() => handleDownloadTelegramProof(pay)}
+                                    disabled={downloadingProofId === pay.id}
+                                    className="px-3.5 py-2 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 rounded-xl font-black cursor-pointer transition active:scale-95 flex items-center gap-1 hover:shadow-[0_0_15px_rgba(245,196,0,0.3)]"
+                                  >
+                                    {downloadingProofId === pay.id ? (
+                                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <Sparkles className="w-3.5 h-3.5" />
+                                    )}
+                                    <span>Telegram Proof PNG</span>
+                                  </button>
+                                )}
+                              </div>
                             )}
                           </div>
 
@@ -959,7 +1307,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
               />
             </div>
 
-            <div className="w-full flex items-center justify-center gap-3 mt-4">
+             <div className="w-full flex items-center justify-center gap-3 mt-4">
               <button
                 onClick={() => handleDownloadScreenshot(zoomedScreenshot.url, zoomedScreenshot.id)}
                 className="px-4.5 py-2 bg-slate-900 border border-slate-800 text-[#F5C400] text-[9.5px] font-mono uppercase tracking-widest rounded-xl hover:bg-slate-850 flex items-center gap-1.5 cursor-pointer"
@@ -967,6 +1315,26 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
                 <Download className="w-3.5 h-3.5" />
                 <span>Save Local PNG</span>
               </button>
+              {(() => {
+                const associatedPay = paymentsList.find(p => p.id === zoomedScreenshot.id);
+                if (associatedPay && associatedPay.status === 'approved') {
+                  return (
+                    <button
+                      onClick={() => handleDownloadTelegramProof(associatedPay)}
+                      disabled={downloadingProofId === associatedPay.id}
+                      className="px-4.5 py-2 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 text-slate-950 text-[9.5px] font-mono uppercase tracking-widest rounded-xl hover:from-amber-450 hover:to-yellow-400 flex items-center gap-1.5 cursor-pointer font-black hover:shadow-[0_0_15px_rgba(245,196,0,0.35)] transition"
+                    >
+                      {downloadingProofId === associatedPay.id ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-3.5 h-3.5" />
+                      )}
+                      <span>Telegram Proof</span>
+                    </button>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
         </div>

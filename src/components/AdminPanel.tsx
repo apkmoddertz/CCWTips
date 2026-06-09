@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MatchTip, DateItem } from '../types';
 import { db, restoreScreenshotMatches } from '../firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { Key, Plus, RefreshCw, X, Shield, PlusCircle, CheckCircle, Database, Settings, Sparkles, Users, Trash2, Calendar, User, Mail, DollarSign, Copy, Eye, Image, Search, ShieldCheck, ShieldAlert, Lock, Check, Download, Share2 } from 'lucide-react';
+import { Key, Plus, RefreshCw, X, Shield, PlusCircle, CheckCircle, Database, Settings, Sparkles, Users, Trash2, Calendar, User, Mail, DollarSign, Copy, Eye, Image, Search, ShieldCheck, ShieldAlert, Lock, Check, Download, Share2, ExternalLink } from 'lucide-react';
 import { DateTimeRowPicker } from './DateTimePicker';
 import { exportReceiptToPNG } from '../utils/canvasExporter';
 import { AdminReceiptsManager } from './AdminReceiptsManager';
@@ -136,6 +136,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [selectedScreenshotUrl, setSelectedScreenshotUrl] = useState<string | null>(null);
   const [showEmailsInReceipts, setShowEmailsInReceipts] = useState(true);
+  const [hideEmails, setHideEmails] = useState(false);
+  const [isFullscreenPage, setIsFullscreenPage] = useState(false);
 
   // Approving payment date range modal state
   const [paymentToApprove, setPaymentToApprove] = useState<any | null>(null);
@@ -392,9 +394,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   return (
-    <div className="absolute inset-0 bg-[#05070F]/85 backdrop-blur-md z-50 flex items-center justify-center p-3 animate-fade-in">
+    <div className={isFullscreenPage ? "absolute inset-0 bg-[#060813] z-50 flex flex-col p-0 animate-fade-in text-white" : "absolute inset-0 bg-[#05070F]/85 backdrop-blur-md z-50 flex items-center justify-center p-3 animate-fade-in text-white"}>
       {/* Container - Fixed centering within EAT container boundaries */}
-      <div className={`relative bg-[#0D1222] border border-[#1E2538] w-full transition-all duration-300 rounded-[24px] overflow-hidden shadow-2xl flex flex-col max-h-[85vh] ${activeSubTab === 'payments' || activeSubTab === 'users' || activeSubTab === 'settings' ? 'max-w-[540px]' : 'max-w-[340px]'}`}>
+      <div className={isFullscreenPage ? "relative bg-[#0D1222] w-full h-full flex flex-col transition-all duration-300" : `relative bg-[#0D1222] border border-[#1E2538] w-full transition-all duration-300 rounded-[24px] overflow-hidden shadow-2xl flex flex-col max-h-[85vh] ${activeSubTab === 'payments' || activeSubTab === 'users' || activeSubTab === 'settings' ? 'max-w-[540px]' : 'max-w-[340px]'}`}>
         {/* Yellow decorative top bar */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#F5C400] to-amber-500"></div>
 
@@ -409,12 +411,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <p className="text-[8.5px] text-slate-450 font-mono leading-none mt-0.5">Control & Management Platform</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="h-7 w-7 rounded-full bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-400 transition active:scale-90"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
+          
+          <div className="flex items-center gap-1.5">
+            {/* Shortcut button to open full page layout for all recipients */}
+            <button
+              onClick={() => {
+                setActiveSubTab('payments');
+                setIsFullscreenPage(true);
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-[#F5C400]/10 border border-[#F5C400]/30 hover:bg-[#F5C400] hover:text-[#0D1222] flex items-center gap-1.5 text-[8.5px] font-black uppercase text-[#F5C400] transition active:scale-90 cursor-pointer select-none"
+              title="Open full page dedicated recipients view"
+              id="fullscreen_recipients_shortcut_btn"
+            >
+              <ExternalLink className="w-3 h-3" />
+              <span>Full Page Receipts</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="h-7 w-7 rounded-full bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-400 transition active:scale-90"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Sub-Tabs Selector */}
@@ -469,7 +488,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className="p-4 overflow-y-auto scrollbar-none flex-1">
+        <div className={isFullscreenPage ? "overflow-y-auto flex-1 flex flex-col min-h-0 bg-[#060813]" : "p-4 overflow-y-auto scrollbar-none flex-1"}>
           {activeSubTab === 'add' && (
             /* Publish Tip Form */
             <form onSubmit={handleAddSubmit} className="space-y-3.5">
@@ -599,6 +618,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               paymentsLoading={paymentsLoading} 
               onRefreshList={fetchPayments} 
               onShowNotification={onShowNotification} 
+              hideEmails={hideEmails}
+              setHideEmails={setHideEmails}
+              isFullscreenPage={isFullscreenPage}
+              setIsFullscreenPage={setIsFullscreenPage}
             />
           )}
 
@@ -943,7 +966,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-slate-800/60 pb-1.5">
                 <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-bold">Registered Users</span>
-                <span className="text-[9px] bg-slate-955 border border-slate-800 px-2 py-0.5 rounded text-[#F5C400] font-black">{usersList.length} total</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setHideEmails(!hideEmails)}
+                    className={`text-[8px] border px-2 py-0.5 rounded-lg font-bold uppercase tracking-wider transition cursor-pointer select-none`}
+                    style={{
+                      backgroundColor: hideEmails ? 'rgba(245, 196, 0, 0.15)' : 'rgba(15, 23, 42, 0.6)',
+                      borderColor: hideEmails ? 'rgba(245, 196, 0, 0.4)' : 'rgba(30, 41, 59, 1)',
+                      color: hideEmails ? '#F5C400' : '#94A3B8'
+                    }}
+                    id="toggle_emails_users_tab"
+                  >
+                    {hideEmails ? "Emails Masked" : "Hide Emails"}
+                  </button>
+                  <span className="text-[9px] bg-slate-955 border border-slate-800 px-2 py-0.5 rounded text-[#F5C400] font-black">{usersList.length} total</span>
+                </div>
               </div>
 
               {/* Users Search Form */}
@@ -1047,7 +1085,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               {usr.username || usr.email?.split('@')[0] || 'User Profile'}
                             </span>
                             <span className="block text-[9px] font-mono text-slate-400 select-all truncate">
-                              {usr.email}
+                              {hideEmails ? "••••••••••••••••••••" : usr.email}
                             </span>
                           </div>
                           
