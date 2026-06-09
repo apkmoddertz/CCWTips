@@ -45,45 +45,57 @@ const getExpirationDateForPlan = (price?: number, duration?: string): { endDate:
 
   // 1 Day preset - ends today (at 23:59 EAT)
   if (normDuration.includes('1day') || normDuration === 'day' || p === 15) {
-    return { endDate: getTodayInEATString(), rangeType: 'today' };
+    return { endDate: getTodayInEATString(), rangeType: '1day' };
   }
-  // 1 Month preset - ends after 30 days starting today
-  if (normDuration.includes('1month') || normDuration === 'month' || normDuration.includes('30day') || p === 420) {
-    return { endDate: getFutureEATDateString(30), rangeType: 'month' };
+  // 1 Week preset - ends after 7 days starting today
+  if (normDuration.includes('1week') || normDuration.includes('7day') || p === 105) {
+    return { endDate: getFutureEATDateString(7), rangeType: '7days' };
   }
-  // 3 Months preset - ends after 90 days starting today
-  if (normDuration.includes('3month') || p === 999) {
-    return { endDate: getFutureEATDateString(90), rangeType: '3months' };
+  // 2 Weeks preset - ends after 14 days
+  if (normDuration.includes('2week') || normDuration.includes('14day')) {
+    return { endDate: getFutureEATDateString(14), rangeType: '14days' };
   }
-  // 5 Months preset - ends after 150 days starting today
-  if (normDuration.includes('5month') || p === 1600) {
-    return { endDate: getFutureEATDateString(150), rangeType: '5months' };
+  // 4 Weeks / 1 Month preset - ends after 28 days starting today
+  if (normDuration.includes('1month') || normDuration === 'month' || normDuration.includes('28day') || normDuration.includes('4week') || normDuration.includes('30day') || p === 420) {
+    return { endDate: getFutureEATDateString(28), rangeType: '28days' };
   }
-  // 6 Months preset - ends after 180 days starting today
-  if (normDuration.includes('6month') || p === 1800) {
-    return { endDate: getFutureEATDateString(180), rangeType: '6months' };
+  // 8 Weeks / 2 Months preset - ends after 56 days
+  if (normDuration.includes('8week') || normDuration.includes('56day') || normDuration.includes('2month') || p === 800) {
+    return { endDate: getFutureEATDateString(56), rangeType: '56days' };
   }
-  // 12 Months preset - ends after 365 days starting today
-  if (normDuration.includes('12month') || normDuration.includes('year') || normDuration.includes('annual') || p === 2900) {
-    return { endDate: getFutureEATDateString(365), rangeType: '12months' };
+  // 12 Weeks / 3 Months preset - ends after 84 days starting today
+  if (normDuration.includes('3month') || normDuration.includes('12week') || normDuration.includes('84day') || p === 999) {
+    return { endDate: getFutureEATDateString(84), rangeType: '84days' };
+  }
+  // 24 Weeks / 6 Months preset - ends after 168 days
+  if (normDuration.includes('6month') || normDuration.includes('24week') || normDuration.includes('168day') || p === 1800) {
+    return { endDate: getFutureEATDateString(168), rangeType: '168days' };
+  }
+  // 52 Weeks / 1 Year - ends after 364 days starting today
+  if (normDuration.includes('12month') || normDuration.includes('52week') || normDuration.includes('364day') || normDuration.includes('year') || normDuration.includes('annual') || p === 2900) {
+    return { endDate: getFutureEATDateString(364), rangeType: '364days' };
   }
 
   // Fallback heuristic check based on prices
   if (p <= 15) {
-    return { endDate: getTodayInEATString(), rangeType: 'today' };
+    return { endDate: getTodayInEATString(), rangeType: '1day' };
+  } else if (p <= 150) {
+    return { endDate: getFutureEATDateString(7), rangeType: '7days' };
+  } else if (p <= 300) {
+    return { endDate: getFutureEATDateString(14), rangeType: '14days' };
   } else if (p <= 450) {
-    return { endDate: getFutureEATDateString(30), rangeType: 'month' };
+    return { endDate: getFutureEATDateString(28), rangeType: '28days' };
+  } else if (p <= 850) {
+    return { endDate: getFutureEATDateString(56), rangeType: '56days' };
   } else if (p <= 1050) {
-    return { endDate: getFutureEATDateString(90), rangeType: '3months' };
-  } else if (p <= 1650) {
-    return { endDate: getFutureEATDateString(150), rangeType: '5months' };
-  } else if (p <= 1850) {
-    return { endDate: getFutureEATDateString(180), rangeType: '6months' };
+    return { endDate: getFutureEATDateString(84), rangeType: '84days' };
+  } else if (p <= 1855) {
+    return { endDate: getFutureEATDateString(168), rangeType: '168days' };
   } else if (p <= 3000) {
-    return { endDate: getFutureEATDateString(365), rangeType: '12months' };
+    return { endDate: getFutureEATDateString(364), rangeType: '364days' };
   }
 
-  return { endDate: getFutureEATDateString(30), rangeType: 'month' };
+  return { endDate: getFutureEATDateString(28), rangeType: '28days' };
 };
 
 const formatDurationForReceipt = (duration: string | undefined): string => {
@@ -1488,91 +1500,42 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="space-y-3.5">
               <div className="space-y-1.5">
                 <label className="block text-[8.5px] text-slate-400 font-extrabold uppercase tracking-wider">Select Access Preset</label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setApprovalRangeType('today');
-                      setApprovalEndDate(getTodayInEATString());
-                    }}
-                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
-                      approvalRangeType === 'today'
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
-                    }`}
-                  >
-                    1 Day (Today)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setApprovalRangeType('week');
-                      setApprovalEndDate(getFutureEATDateString(7));
-                    }}
-                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
-                      approvalRangeType === 'week'
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
-                    }`}
-                  >
-                    1 Week (7d)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setApprovalRangeType('month');
-                      setApprovalEndDate(getFutureEATDateString(30));
-                    }}
-                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
-                      approvalRangeType === 'month'
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
-                    }`}
-                  >
-                    1 Month (30d)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setApprovalRangeType('3months');
-                      setApprovalEndDate(getFutureEATDateString(90));
-                    }}
-                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
-                      approvalRangeType === '3months'
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
-                    }`}
-                  >
-                    3 Months (90d)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setApprovalRangeType('6months');
-                      setApprovalEndDate(getFutureEATDateString(180));
-                    }}
-                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
-                      approvalRangeType === '6months'
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
-                    }`}
-                  >
-                    6 Months (180d)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setApprovalRangeType('12months');
-                      setApprovalEndDate(getFutureEATDateString(365));
-                    }}
-                    className={`py-1.5 px-2 rounded-lg text-[8.5px] font-black uppercase transition border ${
-                      approvalRangeType === '12months'
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                        : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200'
-                    }`}
-                  >
-                    1 Year (365d)
-                  </button>
+                <div className="grid grid-cols-1 gap-1.5 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
+                  {[
+                    { id: '1day', label: '1 DAY PASS (1 DAY)', getVal: () => getTodayInEATString(), warning: true },
+                    { id: '7days', label: '1 WEEK PASS (7 DAYS)', getVal: () => getFutureEATDateString(7) },
+                    { id: '14days', label: '2 WEEKS PASS (14 DAYS)', getVal: () => getFutureEATDateString(14) },
+                    { id: '28days', label: '4 WEEKS / 1 MONTH (28 DAYS)', getVal: () => getFutureEATDateString(28) },
+                    { id: '56days', label: '8 WEEKS / 2 MONTHS (56 DAYS)', getVal: () => getFutureEATDateString(56) },
+                    { id: '84days', label: '12 WEEKS / 3 MONTHS (84 DAYS)', getVal: () => getFutureEATDateString(84) },
+                    { id: '168days', label: '24 WEEKS / 6 MONTHS (168 DAYS)', getVal: () => getFutureEATDateString(168) },
+                    { id: '364days', label: '52 WEEKS / 1 YEAR (364 DAYS)', getVal: () => getFutureEATDateString(364) },
+                  ].map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => {
+                        setApprovalRangeType(preset.id);
+                        setApprovalEndDate(preset.getVal());
+                      }}
+                      className={`py-1.5 px-2.5 rounded-lg text-[8px] sm:text-[8.5px] font-black uppercase transition border flex items-center justify-between cursor-pointer ${
+                        approvalRangeType === preset.id
+                          ? preset.warning
+                            ? 'bg-amber-500/15 border-amber-500/80 text-amber-400 font-extrabold shadow-[0_0_8px_rgba(245,158,11,0.2)]'
+                            : 'bg-emerald-500/10 border-emerald-500/60 text-emerald-400 font-extrabold'
+                          : preset.warning
+                          ? 'bg-amber-950/20 border-amber-500/20 text-amber-500/70 hover:text-amber-400 hover:border-amber-500/40'
+                          : 'bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200 hover:border-slate-700'
+                      }`}
+                    >
+                      <span>{preset.label}</span>
+                      {preset.warning && (
+                        <span className="text-[6.5px] bg-amber-500/20 border border-amber-500/30 text-amber-400 px-1 py-0.2 rounded font-mono leading-none tracking-normal normal-case">
+                          Expires 23:59 Tonight
+                        </span>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
 
