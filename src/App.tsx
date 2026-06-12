@@ -1124,30 +1124,38 @@ export default function App() {
 
                 {/* Match Tip Listing cards */}
                 {matchesLoading ? (
-                  <div className="space-y-3.5">
+                  <div className="space-y-2">
                     {[1, 2].map((i) => (
-                      <div key={i} className="relative overflow-hidden bg-[#121724] border border-[#1E2538]/80 rounded-[22px] p-3.5 px-4 mb-3 shadow-md animate-pulse">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="h-2.5 w-24 bg-slate-800/70 rounded-full"></div>
-                          <div className="h-4 w-4 bg-slate-800/70 rounded-full"></div>
+                      <div key={i} className="relative overflow-hidden bg-[#0C101C] border border-[#1E2538] rounded-[18px] py-2 px-3 mb-2 shadow-md animate-pulse">
+                        {/* Top Date / Bookmark Row skeleton */}
+                        <div className="flex items-center justify-between gap-1.5 mb-1.5 px-0.5">
+                          <div className="h-2 w-16 bg-slate-800/70 rounded-full"></div>
+                          <div className="h-4 w-10 bg-slate-800/40 rounded-lg"></div>
                         </div>
-                        <div className="flex items-center justify-between gap-2 mb-4">
-                          <div className="flex-1 flex flex-col items-center">
-                            <div className="w-10 h-10 bg-slate-800/70 rounded-full mb-2"></div>
-                            <div className="h-3 w-20 bg-slate-800/70 rounded-full"></div>
+
+                        {/* Teams Row capsules skeleton */}
+                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 mb-1.5">
+                          <div className="bg-[#1B2132]/65 rounded-[10px] px-2.5 py-1 min-h-[28px] flex items-center justify-center">
+                            <div className="h-2.5 w-16 bg-slate-800/50 rounded-full"></div>
                           </div>
-                          <div className="px-3 py-1 bg-slate-800/45 rounded text-[10px] text-slate-600 font-mono font-bold uppercase select-none">VS</div>
-                          <div className="flex-1 flex flex-col items-center">
-                            <div className="w-10 h-10 bg-slate-800/70 rounded-full mb-2"></div>
-                            <div className="h-3 w-20 bg-slate-800/70 rounded-full"></div>
+                          <div className="px-1 text-slate-800 font-black text-[11px] uppercase tracking-widest">
+                            vs
+                          </div>
+                          <div className="bg-[#1B2132]/65 rounded-[10px] px-2.5 py-1 min-h-[28px] flex items-center justify-center">
+                            <div className="h-2.5 w-16 bg-slate-800/50 rounded-full"></div>
                           </div>
                         </div>
-                        <div className="bg-[#0b0e17] border border-slate-900 rounded-[14px] p-2.5 flex items-center justify-between gap-2.5">
-                          <div className="space-y-1.5 flex-1">
-                            <div className="h-2 w-12 bg-slate-800/70 rounded-full"></div>
-                            <div className="h-2.5 w-28 bg-slate-800/70 rounded-full animate-pulse"></div>
+
+                        {/* Details Row layout skeleton */}
+                        <div className="flex items-center justify-between mt-1.5 px-0.5">
+                          <div className="flex items-center space-x-1.5 min-w-0 flex-1">
+                            <div className="h-2.5 w-10 bg-slate-800/70 rounded-full flex-shrink-0"></div>
+                            <span className="text-slate-800 font-extrabold select-none text-[10px] flex-shrink-0">
+                              →
+                            </span>
+                            <div className="h-2.5 w-24 bg-slate-800/50 rounded-full flex-shrink-0"></div>
                           </div>
-                          <div className="h-5 w-14 bg-slate-800/70 rounded-lg"></div>
+                          <div className="h-5 w-14 bg-slate-800/70 rounded-full flex-shrink-0"></div>
                         </div>
                       </div>
                     ))}
