@@ -469,24 +469,26 @@ export const VIPPlans: React.FC<VIPPlansProps> = ({
             {/* CARD 1: 1 Day - $15 */}
             <div 
               onClick={() => startCheckout('1 Day', 15)}
-              className="group cursor-pointer relative bg-gradient-to-b from-[#11172A] to-[#080B15] border border-slate-800 hover:border-[#F5C400]/50 active:scale-95 transition-all duration-200 rounded-2xl pt-3 pb-3.5 px-1.5 flex flex-col justify-between items-center text-center shadow-lg hover:shadow-black/40"
+              className="group cursor-pointer relative bg-gradient-to-b from-[#0D221C] to-[#07100D] border border-emerald-500/30 hover:border-emerald-400 active:scale-95 transition-all duration-200 rounded-2xl pt-3 pb-3.5 px-1.5 flex flex-col justify-between items-center text-center shadow-lg shadow-emerald-500/5 hover:shadow-black/40"
               id="plan_1day_btn"
             >
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-slate-800 text-[7.5px] font-black px-1.5 py-0.5 rounded-full text-slate-400 uppercase tracking-wider select-none leading-none group-hover:bg-[#F5C400] group-hover:text-black transition-colors">
-                DAILY
+              <div className="absolute -inset-[1px] bg-gradient-to-b from-emerald-500/20 to-transparent rounded-2xl -z-10 opacity-75" />
+              
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-[7.5px] font-black px-1.5 py-0.5 rounded-full text-black uppercase tracking-wider select-none leading-none">
+                DAILY PLAN
               </div>
               
               <div className="mt-1.5">
-                <span className="block text-[#94A3B8] text-[9px] font-black uppercase tracking-wide">
+                <span className="block text-emerald-300 text-[9px] font-black uppercase tracking-wide">
                   1 Day Pass
                 </span>
-                <span className="block text-white text-xl font-extrabold tracking-tight mt-1 group-hover:text-[#F5C400] transition-colors leading-none">
+                <span className="block text-white text-xl font-extrabold tracking-tight mt-1 group-hover:text-emerald-400 transition-colors leading-none">
                   $15
                 </span>
               </div>
 
               <div className="mt-3.5 w-full px-1">
-                <div className="bg-[#1E293B] group-hover:bg-[#F5C400] text-[#CBD5E1] group-hover:text-black text-[8px] font-black tracking-wider uppercase py-1.5 rounded-lg text-center transition-all">
+                <div className="bg-emerald-500 text-slate-950 text-[8px] font-black tracking-wider uppercase py-1.5 rounded-lg text-center transition-all shadow-[0_2px_8px_rgba(16,185,129,0.35)]">
                   ACTIVATE
                 </div>
               </div>
