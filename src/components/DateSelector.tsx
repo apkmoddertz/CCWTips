@@ -7,6 +7,7 @@ interface DateSelectorProps {
   onSelectDate: (id: string) => void;
   matchCounts?: Record<string, number>;
   activeTab?: string;
+  isLoading?: boolean;
 }
 
 // EAT timezone is UTC+3
@@ -43,6 +44,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({
   onSelectDate,
   matchCounts = {},
   activeTab,
+  isLoading = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -104,6 +106,35 @@ export const DateSelector: React.FC<DateSelectorProps> = ({
       }
     };
   }, [selectedDateId, dates, activeTab]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full pt-1.5 pb-0.5 select-none">
+        <div className="flex space-x-3.5 overflow-x-auto pb-1 px-4 scrollbar-none snap-x snap-mandatory">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className="flex-none snap-start relative w-[74px] h-[108px] overflow-visible animate-pulse"
+            >
+              {/* Card Container block mimicking inactive Date pill */}
+              <div className="absolute top-0 left-0 w-full h-[82px] rounded-[24px] bg-[#101424] border border-[#1E2538] flex flex-col items-center justify-start pt-3.5 px-1.5">
+                {/* Month/Relative label skeleton */}
+                <div className="h-3 w-10 bg-slate-800/40 rounded-md mt-1" />
+                
+                {/* Day name skeleton */}
+                <div className="h-2.5 w-8 bg-slate-800/40 rounded-full mt-2" />
+                
+                {/* Day Number Circle skeleton centered exactly at the bottom edge */}
+                <div className="absolute bottom-0 translate-y-1/2 flex items-center justify-center w-[40px] h-[40px] rounded-full border border-[#1E2538] bg-[#141A2E]">
+                  <div className="w-4 h-4 bg-slate-800/40 rounded-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full pt-1.5 pb-0.5 select-none">

@@ -1072,6 +1072,7 @@ export default function App() {
               onSelectDate={setSelectedDateId}
               matchCounts={matchCountsMap}
               activeTab={activeTab}
+              isLoading={matchesLoading}
             />
           )}
         </div>
