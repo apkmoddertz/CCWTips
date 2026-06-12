@@ -175,3 +175,74 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid #000;
   box-shadow: 0 0 10px rgba(245, 196, 0, 0.8);
 }
+
+@keyframes shimmerSweep {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  35%, 100% { transform: translateX(150%) skewX(-20deg); }
+}
+
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(245, 196, 0, 0.1), inset 0 0 4px rgba(245, 196, 0, 0.05);
+    border-color: rgba(30, 37, 56, 1);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(245, 196, 0, 0.35), inset 0 0 8px rgba(245, 196, 0, 0.15);
+    border-color: rgba(245, 196, 0, 0.45);
+  }
+}
+
+@keyframes lockGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(245,196,0,0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(245,196,0,0.7));
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmerSweep 5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.animate-vip-card-glow {
+  animation: goldPulse 3.5s ease-in-out infinite;
+}
+
+.animate-lock-glowing {
+  animation: lockGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes particleFloatOne {
+  0% { transform: translateY(22px) translateX(0px) scale(0.6); opacity: 0; }
+  10% { opacity: 0.9; }
+  50% { transform: translateY(-12px) translateX(10px) scale(1); opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% { transform: translateY(-44px) translateX(3px) scale(0.5); opacity: 0; }
+}
+@keyframes particleFloatTwo {
+  0% { transform: translateY(28px) translateX(0px) scale(0.5); opacity: 0; }
+  15% { opacity: 0.8; }
+  60% { transform: translateY(-16px) translateX(-12px) scale(1.1); opacity: 0.9; }
+  85% { opacity: 0.6; }
+  100% { transform: translateY(-42px) translateX(-6px) scale(0.4); opacity: 0; }
+}
+@keyframes particleFloatThree {
+  0% { transform: translateY(18px) translateX(0px) scale(0.4); opacity: 0; }
+  20% { opacity: 0.85; }
+  50% { transform: translateY(-18px) translateX(16px) scale(1); opacity: 0.7; }
+  80% { opacity: 0.7; }
+  100% { transform: translateY(-48px) translateX(8px) scale(0.3); opacity: 0; }
+}
+
+.animate-particle-1 {
+  animation: particleFloatOne 3.8s ease-in-out infinite;
+}
+.animate-particle-2 {
+  animation: particleFloatTwo 4.8s ease-in-out infinite;
+}
+.animate-particle-3 {
+  animation: particleFloatThree 5.8s ease-in-out infinite;
+}
+
+

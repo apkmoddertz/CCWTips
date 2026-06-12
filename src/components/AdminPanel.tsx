@@ -202,7 +202,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Approving payment date range modal state
   const [paymentToApprove, setPaymentToApprove] = useState<any | null>(null);
   const [approvalEndDate, setApprovalEndDate] = useState<string>(() => getTodayInEATString());
-  const [approvalRangeType, setApprovalRangeType] = useState<string>('today');
+  const [approvalRangeType, setApprovalRangeType] = useState<string>('1day');
 
   // Recycle Bin states
   const [deletedMatches, setDeletedMatches] = useState<any[]>([]);
@@ -1502,7 +1502,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <label className="block text-[8.5px] text-slate-400 font-extrabold uppercase tracking-wider">Select Access Preset</label>
                 <div className="grid grid-cols-1 gap-1.5 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
                   {[
-                    { id: '1day', label: '1 DAY PASS (1 DAY)', getVal: () => getTodayInEATString(), warning: true },
+                    { id: '1day', label: '1 DAY PASS (1 DAY) (Expires today at 23:59 EAT)', getVal: () => getTodayInEATString(), warning: true },
                     { id: '7days', label: '1 WEEK PASS (7 DAYS)', getVal: () => getFutureEATDateString(7) },
                     { id: '14days', label: '2 WEEKS PASS (14 DAYS)', getVal: () => getFutureEATDateString(14) },
                     { id: '28days', label: '4 WEEKS / 1 MONTH (28 DAYS)', getVal: () => getFutureEATDateString(28) },

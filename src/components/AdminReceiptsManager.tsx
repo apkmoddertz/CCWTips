@@ -149,7 +149,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   
   // Expiry date picker modal state upon manual individual approval
   const [approvalTarget, setApprovalTarget] = useState<any | null>(null);
-  const [customApprovalDays, setCustomApprovalDays] = useState<number>(28); // default 28 days
+  const [customApprovalPreset, setCustomApprovalPreset] = useState<string>('1day'); // default 1 day
   const [isApprovingInProgress, setIsApprovingInProgress] = useState<boolean>(false);
 
   // Computed total statistics
@@ -312,7 +312,7 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
   // INDIVIDUAL ACTIONS
   const handlePrepareApprove = (payment: any) => {
     setApprovalTarget(payment);
-    setCustomApprovalDays(28); // Default to roughly 1 month (28 days)
+    setCustomApprovalPreset('1day'); // Default to 1 day
   };
 
   const handleConfirmApproval = async () => {
@@ -320,7 +320,18 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
     setIsApprovingInProgress(true);
     try {
       const today = getEATSendingTodayDateString();
-      const calculatedEndDate = getEATSendingFutureDateString(customApprovalDays);
+      
+      let daysOffset = 28;
+      if (customApprovalPreset === '1day') daysOffset = 0;
+      else if (customApprovalPreset === '7days') daysOffset = 7;
+      else if (customApprovalPreset === '14days') daysOffset = 14;
+      else if (customApprovalPreset === '28days') daysOffset = 28;
+      else if (customApprovalPreset === '56days') daysOffset = 56;
+      else if (customApprovalPreset === '84days') daysOffset = 84;
+      else if (customApprovalPreset === '168days') daysOffset = 168;
+      else if (customApprovalPreset === '364days') daysOffset = 364;
+
+      const calculatedEndDate = getEATSendingFutureDateString(daysOffset);
 
       // Update user role & vip timestamp
       const userRef = doc(db, 'users', approvalTarget.userId);
@@ -1421,27 +1432,39 @@ export const AdminReceiptsManager: React.FC<AdminReceiptsManagerProps> = ({
               <div className="space-y-1.5">
                 <label className="text-[8.5px] font-mono text-slate-400 uppercase font-black tracking-wider block">Duration Preset Length:</label>
                 <select
-                  value={customApprovalDays}
-                  onChange={(e) => setCustomApprovalDays(parseInt(e.target.value))}
+                  value={customApprovalPreset}
+                  onChange={(e) => setCustomApprovalPreset(e.target.value)}
                   className="w-full px-3 py-2 bg-[#090C17] border border-slate-850 focus:border-[#F5C400]/40 rounded-xl text-slate-100 text-[11px] font-mono font-bold uppercase transition outline-none"
                 >
-                  <option value={0}>1 DAY PASS (1 DAY)</option>
-                  <option value={7}>1 WEEK PASS (7 DAYS)</option>
-                  <option value={14}>2 WEEKS PASS (14 DAYS)</option>
-                  <option value={28}>4 WEEKS / 1 MONTH (28 DAYS)</option>
-                  <option value={56}>8 WEEKS / 2 MONTHS (56 DAYS)</option>
-                  <option value={84}>12 WEEKS / 3 MONTHS (84 DAYS)</option>
-                  <option value={168}>24 WEEKS / 6 MONTHS (168 DAYS)</option>
-                  <option value={364}>52 WEEKS / 1 YEAR (364 DAYS)</option>
+                  <option value="1day">1 DAY PASS (1 DAY) (Expires today at 23:59 EAT)</option>
+                  <option value="7days">1 WEEK PASS (7 DAYS)</option>
+                  <option value="14days">2 WEEKS PASS (14 DAYS)</option>
+                  <option value="28days">4 WEEKS / 1 MONTH (28 DAYS)</option>
+                  <option value="56days">8 WEEKS / 2 MONTHS (56 DAYS)</option>
+                  <option value="84days">12 WEEKS / 3 MONTHS (84 DAYS)</option>
+                  <option value="168days">24 WEEKS / 6 MONTHS (168 DAYS)</option>
+                  <option value="364days">52 WEEKS / 1 YEAR (364 DAYS)</option>
                 </select>
               </div>
 
               <div className="text-center text-[9px] font-mono text-amber-500 bg-[#F5C400]/5 py-2 px-2.5 rounded-lg border border-[#F5C400]/10 leading-relaxed font-bold">
-                {customApprovalDays === 0 ? (
-                  <span className="text-amber-400">⚠️ Expires at 23:59pm today EAT even if approved at 23:50!</span>
-                ) : (
-                  <span>🔒 Access starts EAT Today & automatically expires on {getEATSendingFutureDateString(customApprovalDays)}</span>
-                )}
+                {(() => {
+                  let daysOffset = 28;
+                  if (customApprovalPreset === '1day') daysOffset = 0;
+                  else if (customApprovalPreset === '7days') daysOffset = 7;
+                  else if (customApprovalPreset === '14days') daysOffset = 14;
+                  else if (customApprovalPreset === '28days') daysOffset = 28;
+                  else if (customApprovalPreset === '56days') daysOffset = 56;
+                  else if (customApprovalPreset === '84days') daysOffset = 84;
+                  else if (customApprovalPreset === '168days') daysOffset = 168;
+                  else if (customApprovalPreset === '364days') daysOffset = 364;
+
+                  return customApprovalPreset === '1day' ? (
+                    <span className="text-amber-400">⚠️ Expires at 23:59pm today EAT even if approved at 23:50!</span>
+                  ) : (
+                    <span>🔒 Access starts EAT Today & automatically expires on {getEATSendingFutureDateString(daysOffset)}</span>
+                  );
+                })()}
               </div>
             </div>
 

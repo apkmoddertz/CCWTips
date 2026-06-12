@@ -16,6 +16,62 @@ interface MatchCardProps {
   onToggleFollow?: () => void;
 }
 
+const PremiumShieldCrownDiamondIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => {
+  return (
+    <svg 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      className={className}
+    >
+      <defs>
+        <linearGradient id="premiumGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFFAD4" />
+          <stop offset="35%" stopColor="#F5C400" />
+          <stop offset="70%" stopColor="#AD8000" />
+          <stop offset="100%" stopColor="#F5C400" />
+        </linearGradient>
+      </defs>
+      
+      {/* Padlock Shackle for the Lock look */}
+      <path 
+        d="M8.5 8.5V5.5a3.5 3.5 0 0 1 7 0v3" 
+        stroke="url(#premiumGoldGrad)" 
+        strokeWidth="1.8" 
+        strokeLinecap="round"
+      />
+
+      {/* High-end Fintech Shield Background silhouette */}
+      <path 
+        d="M12 21.5s7-3.5 7-9.5V8.5l-7-3-7 3v4c0 6 7 9.5 7 9.5z" 
+        stroke="url(#premiumGoldGrad)" 
+        strokeWidth="1.8" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        fill="rgba(9,12,23,0.85)"
+      />
+      
+      {/* Elegant Crown overlay */}
+      <path 
+        d="M8.5 11l1.5 1 2-2.5 2 2.5 1.5-1v3h-7V11z" 
+        fill="url(#premiumGoldGrad)"
+        stroke="url(#premiumGoldGrad)"
+        strokeWidth="0.4"
+        strokeLinejoin="round"
+      />
+      
+      {/* Precision cut Diamond emblem at the core */}
+      <path 
+        d="M12 13.5l2.25 2.25-2.25 2.25-2.25-2.25 2.25-2.25z" 
+        fill="none"
+        stroke="url(#premiumGoldGrad)"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
 export const MatchCard: React.FC<MatchCardProps> = ({
   match,
   isAdminActive,
@@ -96,10 +152,28 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   const isLocked = match.type === 'vip' && match.status === 'pending' && !isVipUnlocked && !isAdminActive;
 
   return (
-    <div className="relative group overflow-hidden bg-[#121724] border border-[#1E2538] rounded-[18px] py-2 px-3 mb-2 shadow-md transition-all duration-300 hover:border-[#F5C400]/20 hover:shadow-lg hover:shadow-black/30">
-      {/* Subtle inner card glow for VIP items */}
+    <div 
+      className={`relative group overflow-hidden bg-[#0C101C] rounded-[18px] py-2 px-3 mb-2 shadow-md transition-all duration-300 ${
+        match.type === 'vip' 
+          ? 'border border-[#1E2538]' 
+          : 'border border-[#1E2538] hover:border-[#1E2538]'
+      }`}
+    >
+      {/* Stadium Floodlights beam effect in upper corners */}
       {match.type === 'vip' && (
-        <div className="absolute inset-x-0 top-0 h-[1.5px] bg-[#F5C400]/40"></div>
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.18] rounded-[18px]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 85% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 45%)'
+          }}
+        />
+      )}
+
+      {/* Moving Shimmer Sweep Effect across the background */}
+      {match.type === 'vip' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[18px]">
+          <div className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer-sweep pointer-events-none" />
+        </div>
       )}
 
       {isEditing && (
@@ -240,42 +314,115 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         <div className="relative">
           {/* Unlock Overlay for non-VIP pending matches */}
           {isLocked && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-2 bg-[#0c101c]/90 backdrop-blur-[5px] rounded-[18px]">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-2 bg-[#04060C]/94 backdrop-blur-[3.5px] rounded-[18px]">
+              {/* Stadium Floodlights beams in lock overlay background */}
+              <div 
+                className="absolute inset-0 pointer-events-none opacity-40 rounded-[18px]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.22) 0% , transparent 60%)'
+                }}
+              />
+              
+              {/* Star / Twinkle mini sparks */}
+              <div className="absolute top-2 left-6 w-1 h-1 bg-blue-400 rounded-full animate-ping pointer-events-none opacity-60" style={{ animationDuration: '2.5s' }} />
+              <div className="absolute bottom-3 right-8 w-1 h-1 bg-blue-300 rounded-full animate-ping pointer-events-none opacity-45" style={{ animationDuration: '3.8s' }} />
+              <div className="absolute top-3 right-5 w-1.5 h-1.5 bg-white rounded-full animate-ping pointer-events-none opacity-50" style={{ animationDuration: '2s' }} />
+
+              {/* Advanced Golden Drifting Particle Material - Perfectly layered */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[18px]">
+                <div 
+                  className="absolute left-[12%] bottom-[-5px] w-[3px] h-[3px] rounded-full bg-[#F5C400] opacity-95 animate-particle-1" 
+                  style={{ boxShadow: '0 0 6px 1px rgba(245, 196, 0, 0.9)' }} 
+                />
+                <div 
+                  className="absolute left-[28%] bottom-[-4px] w-[4px] h-[4px] rounded-full bg-[#FFF2A3] opacity-75 animate-particle-2" 
+                  style={{ animationDelay: '0.5s', boxShadow: '0 0 5px 1px rgba(255, 242, 163, 0.8)' }} 
+                />
+                <div 
+                  className="absolute left-[45%] bottom-[-6px] w-[3px] h-[3px] rounded-full bg-[#FFFFFF] opacity-90 animate-particle-3" 
+                  style={{ animationDelay: '1.2s', boxShadow: '0 0 4px 1px rgba(255, 255, 255, 0.8)' }} 
+                />
+                <div 
+                  className="absolute left-[62%] bottom-[-5px] w-[4px] h-[4px] rounded-full bg-[#F5C400] opacity-70 animate-particle-1" 
+                  style={{ animationDelay: '1.8s', boxShadow: '0 0 6px 1px rgba(245, 196, 0, 0.8)' }} 
+                />
+                <div 
+                  className="absolute left-[80%] bottom-[-4px] w-[3px] h-[3px] rounded-full bg-[#FFA900] opacity-85 animate-particle-2" 
+                  style={{ animationDelay: '2.4s', boxShadow: '0 0 5px 1px rgba(255, 169, 0, 0.85)' }} 
+                />
+                <div 
+                  className="absolute left-[35%] bottom-[-3px] w-[3px] h-[3px] rounded-full bg-[#FFFFFF] opacity-65 animate-particle-3" 
+                  style={{ animationDelay: '3.0s', boxShadow: '0 0 4px 1.5px rgba(255, 255, 255, 0.7)' }} 
+                />
+                <div 
+                  className="absolute left-[70%] bottom-[-6px] w-[4px] h-[4px] rounded-full bg-[#FFF2A3] opacity-80 animate-particle-1" 
+                  style={{ animationDelay: '0.8s', boxShadow: '0 0 5px 1px rgba(255, 242, 163, 0.9)' }} 
+                />
+                <div 
+                  className="absolute left-[54%] bottom-[-4px] w-[3.5px] h-[3.5px] rounded-full bg-[#F5C400] opacity-75 animate-particle-2" 
+                  style={{ animationDelay: '3.5s', boxShadow: '0 0 5px 1px rgba(245, 196, 0, 0.75)' }} 
+                />
+              </div>
+
               {isMatchCurrentlyLive ? (
-                <div className="flex flex-col items-center gap-1.5 animate-fade-in relative z-10">
-                  <div className="bg-rose-550/15 border border-rose-500/25 text-rose-400 font-extrabold text-[10.5px] uppercase tracking-wider py-1.5 px-4 rounded-full select-none flex items-center gap-1.5 shadow-[0_0_12px_rgba(244,63,94,0.15)]">
+                <div className="flex flex-col items-center gap-1 animate-fade-in relative z-10 pb-1">
+                  <div className="bg-rose-550/15 border border-rose-500/25 text-rose-400 font-extrabold text-[9.5px] uppercase tracking-wider py-1 px-3.5 rounded-full select-none flex items-center gap-1 shadow-[0_0_12px_rgba(244,63,94,0.15)]">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
                     </span>
                     <span>LIVE MATCH LOCKED</span>
                   </div>
-                  <span className="text-[9.5px] text-slate-400 font-bold tracking-tight opacity-95">
-                    Subscriptions Locked For Live VIP Matches
+                  <span className="text-[8.5px] text-slate-400 font-bold tracking-tight opacity-95">
+                    Locked for Live VIP Members
                   </span>
                 </div>
               ) : (
-                <>
-                  {/* Soft yellow drop glow layer behind the pill button */}
-                  <div className="absolute w-[120px] h-[34px] bg-[#F5C400]/22 rounded-full blur-[10px] pointer-events-none" />
+                <div className="flex flex-col items-center justify-center gap-1.5 w-full relative z-10">
+                  {/* Highly polished premium lock emblem centered */}
+                  <div className="flex flex-col items-center select-none mt-[-6px]">
+                    <div className="relative p-1 bg-[#05070D]/95 rounded-full border border-slate-800 flex items-center justify-center">
+                      <PremiumShieldCrownDiamondIcon className="w-[26px] h-[26px]" />
+                    </div>
+                  </div>
+
+                  {/* Soft blue glow core backing the button */}
+                  <div className="absolute w-[75px] h-[24px] bg-[#3B82F6]/15 rounded-full blur-[9px] pointer-events-none -mt-3.5" />
                   
                   <button
                     type="button"
                     onClick={onRedirectToPlans}
-                    className="relative z-10 bg-[#F5C400] hover:bg-[#ffd11a] text-[#05070F] text-[12.5px] font-black tracking-tight px-5 py-2.5 rounded-full flex items-center justify-center gap-1.5 shadow-[0_4px_16px_rgba(245,196,0,0.55)] transition duration-200 active:scale-95 cursor-pointer"
+                    className="relative z-10 w-[42%] max-w-[124px] h-[32px] bg-[#F5C400] text-slate-950 text-[9.5px] font-black uppercase tracking-widest rounded-[10px] flex items-center justify-center gap-1.5 shadow-[0_3px_10px_rgba(0,0,0,0.6)] hover:scale-[1.05] active:scale-[0.95] transition-all duration-300 overflow-hidden cursor-pointer"
                   >
-                    <Gem className="w-3.5 h-3.5 fill-[#05070F]" strokeWidth={2.5} />
-                    <span>Unlock VIP</span>
+                    {/* Shimmer line sweep inside the buttons */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[10px]">
+                      <div className="absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full animate-shimmer-sweep" />
+                    </div>
+                    
+                    <PremiumShieldCrownDiamondIcon className="w-[12px] h-[12px] !filter-none flex-shrink-0" />
+                    <span className="leading-none text-center">Unlock VIP</span>
                   </button>
-                </>
+                </div>
               )}
             </div>
           )}
 
-          <div className={isLocked ? 'filter blur-[7px] pointer-events-none select-none opacity-20' : ''}>
+          <div className={isLocked ? 'filter blur-[3.8px] pointer-events-none select-none opacity-[0.38]' : ''}>
             {/* Top Date / Bookmark Row */}
-            <div className="flex items-center justify-between mb-1.5 px-0.5 select-none text-[10px]">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-tight">{match.dateId}</span>
+            <div className="flex items-center justify-between gap-1.5 mb-1.5 px-0.5 select-none text-[10px]">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-tight flex-shrink-0">{match.dateId}</span>
+                {match.type === 'vip' && (
+                  <div className="flex gap-1 items-center overflow-x-auto scrollbar-none flex-nowrap shrink-0">
+                    <span className="text-[7.5px] font-extrabold uppercase bg-amber-500/10 border border-amber-500/30 text-amber-400 px-1.5 py-0.2 rounded tracking-wider animate-pulse whitespace-nowrap">
+                      ★ VIP Exclusive
+                    </span>
+                    <span className="text-[7.5px] font-extrabold uppercase bg-red-400/10 border border-red-500/30 text-red-450 px-1.5 py-0.2 rounded tracking-wider whitespace-nowrap">
+                      🔥 Hot Pick
+                    </span>
+                  </div>
+                )}
+              </div>
               
               {onToggleFollow && !isLocked && (
                 <button
@@ -284,7 +431,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                     e.stopPropagation();
                     onToggleFollow();
                   }}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#0c101c] border border-slate-800/80 hover:border-[#F5C400]/30 transition text-[9.5px] font-black uppercase text-slate-400 cursor-pointer"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#0c101c] border border-slate-800/80 hover:border-[#F5C400]/30 transition text-[9.5px] font-black uppercase text-slate-400 cursor-pointer flex-shrink-0"
                   title={isFollowed ? "Remove from my tracking dashboard" : "Bookmark this prediction"}
                 >
                   <Bookmark className={`w-3 h-3 ${isFollowed ? "text-[#F5C400] fill-[#F5C400]" : "text-slate-500"}`} />
@@ -296,55 +443,49 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             </div>
 
             {/* Teams Row (Two visual plates connected by "vs" from pictures) */}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 mb-1.5">
-            {/* Home Team Capsule */}
-            <div className="bg-[#1B2132] rounded-[10px] px-2.5 py-1 text-center min-h-[28px] flex items-center justify-center">
-              <span className="text-slate-100 text-[12px] font-bold tracking-wide leading-none line-clamp-1">
-                {isLocked ? "★ Premium Opponent A" : match.homeTeam}
-              </span>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 mb-1.5">
+              {/* Home Team Capsule */}
+              <div className="bg-[#1B2132] rounded-[10px] px-2.5 py-1 text-center min-h-[28px] flex items-center justify-center">
+                <span className="text-slate-100 text-[12px] font-bold tracking-wide leading-none line-clamp-1">
+                  {match.homeTeam}
+                </span>
+              </div>
+
+              {/* VS Divider badge */}
+              <div className="px-1 font-sans font-black text-[#F5C400] text-[11px] uppercase select-none tracking-widest drop-shadow-[0_0_4px_rgba(245,196,0,0.4)]">
+                vs
+              </div>
+
+              {/* Away Team Capsule */}
+              <div className="bg-[#1B2132] rounded-[10px] px-2.5 py-1 text-center min-h-[28px] flex items-center justify-center">
+                <span className="text-slate-100 text-[12px] font-bold tracking-wide leading-none line-clamp-1">
+                  {match.awayTeam}
+                </span>
+              </div>
             </div>
 
-            {/* VS Divider badge */}
-            <div className="px-1 font-sans font-black text-[#F5C400] text-[11px] uppercase select-none tracking-widest drop-shadow-[0_0_4px_rgba(245,196,0,0.4)]">
-              vs
-            </div>
+            {/* Details Row: Kickoff, Selection, Result Badges (No separator line matching photos!) */}
+            <div className="flex items-center justify-between mt-1.5 px-0.5">
+              <div className="flex items-center space-x-1.5 min-w-0 flex-1">
+                {/* Match Time */}
+                <span className="text-[12px] font-extrabold text-slate-100 tracking-wider flex-shrink-0">
+                  {match.time}
+                </span>
+                
+                <span className="text-slate-500 font-extrabold select-none flex-shrink-0 text-[10px]">
+                  →
+                </span>
 
-            {/* Away Team Capsule */}
-            <div className="bg-[#1B2132] rounded-[10px] px-2.5 py-1 text-center min-h-[28px] flex items-center justify-center">
-              <span className="text-slate-100 text-[12px] font-bold tracking-wide leading-none line-clamp-1">
-                {isLocked ? "★ Premium Opponent B" : match.awayTeam}
-              </span>
-            </div>
-          </div>
-
-          {/* Details Row: Kickoff, Selection, Result Badges (No separator line matching photos!) */}
-          <div className="flex items-center justify-between mt-1.5 px-0.5">
-            <div className="flex items-center space-x-1.5 min-w-0 flex-1">
-              {/* Match Time */}
-              <span className="text-[12px] font-extrabold text-slate-100 tracking-wider flex-shrink-0">
-                {match.time}
-              </span>
-              
-              <span className="text-slate-500 font-extrabold select-none flex-shrink-0 text-[10px]">
-                →
-              </span>
-
-              {/* Prediction Text */}
-              <span className="text-slate-200 text-[12px] font-bold leading-tight line-clamp-1 pr-2">
-                {isLocked ? (
-                  "🔒 Premium Selection Locked"
-                ) : (
-                  <>
-                    <span className="text-slate-200">{match.prediction}</span>
-                    {match.odds !== undefined && match.odds !== null && (
-                      <span className="text-[#F5C400] font-extrabold text-[12px] ml-0.5 tracking-wide select-none">
-                        @{Number(match.odds).toFixed(2)}
-                      </span>
-                    )}
-                  </>
-                )}
-              </span>
-            </div>
+                {/* Prediction Text */}
+                <span className="text-slate-200 text-[12px] font-bold leading-tight line-clamp-1 pr-2">
+                  <span className="text-slate-200">{match.prediction}</span>
+                  {match.odds !== undefined && match.odds !== null && (
+                    <span className="text-[#F5C400] font-extrabold text-[12px] ml-0.5 tracking-wide select-none">
+                      @{Number(match.odds).toFixed(2)}
+                    </span>
+                  )}
+                </span>
+              </div>
 
             {/* Premium Status Result Badges with pure styles */}
             <div className="flex-shrink-0 flex items-center">

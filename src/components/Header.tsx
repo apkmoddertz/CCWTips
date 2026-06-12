@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, User, LogOut, ToggleLeft, ToggleRight, Sparkles, Shield } from 'lucide-react';
+import { Lock, User, LogOut, ToggleLeft, ToggleRight, Sparkles, Shield, Crown, Flame, Gem } from 'lucide-react';
 
 interface HeaderProps {
   onAdminClick: () => void;
@@ -278,12 +278,13 @@ export const Header: React.FC<HeaderProps> = ({
           {/* FREE TIPS */}
           <button
             onClick={() => setActiveTab('free')}
-            className={`flex-1 py-2 text-center text-[10px] font-black tracking-wider uppercase transition-all duration-300 rounded-[8px] flex items-center justify-center gap-1 ${
+            className={`flex-1 py-2 text-center text-[10px] font-black tracking-wider uppercase transition-all duration-300 rounded-[8px] flex items-center justify-center gap-1.5 ${
               activeTab === 'free'
                 ? 'bg-[#F5C400] text-slate-950 shadow-[0_2px_10px_rgba(245,196,0,0.25)] scale-[1.02]'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
             }`}
           >
+            <Flame className={`w-3.5 h-3.5 ${activeTab === 'free' ? 'text-slate-950 fill-current' : 'text-orange-500 fill-orange-500/10'}`} />
             <span>FREE TIPS</span>
           </button>
 
@@ -296,21 +297,20 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
             }`}
           >
+            <Crown className={`w-3.5 h-3.5 ${activeTab === 'vip' ? 'text-slate-950 fill-current' : 'text-[#F5C400] fill-[#F5C400]/10'}`} />
             <span>VIP TIPS</span>
-            {!isVipActive && (
-              <Lock className={`w-3 h-3 ${activeTab === 'vip' ? 'text-slate-950 stroke-[3.5]' : 'text-[#F5C400]/85 stroke-[2.5]'}`} />
-            )}
           </button>
 
           {/* VIP PLANS */}
           <button
             onClick={() => setActiveTab('plans')}
-            className={`flex-1 py-2 text-center text-[10px] font-black tracking-wider uppercase transition-all duration-300 rounded-[8px] flex items-center justify-center gap-1 ${
+            className={`flex-1 py-2 text-center text-[10px] font-black tracking-wider uppercase transition-all duration-300 rounded-[8px] flex items-center justify-center gap-1.5 ${
               activeTab === 'plans'
                 ? 'bg-[#F5C400] text-slate-950 shadow-[0_2px_10px_rgba(245,196,0,0.25)] scale-[1.02]'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/45'
             }`}
           >
+            <Gem className={`w-3.5 h-3.5 ${activeTab === 'plans' ? 'text-slate-950 fill-current' : 'text-cyan-400 fill-cyan-400/10'}`} />
             <span>VIP PLANS</span>
           </button>
         </div>
